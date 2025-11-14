@@ -1,66 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Foster understanding and promote inclusive digital experiences for all">
-    <meta name="author" content="">
-    <!-- Bootstrap core CSS -->
-    <link href="https://getbootstrap.com/docs/4.0/examples/jumbotron/jumbotron.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <!-- Custom styles for Empower Ability Labs -->
-    <link rel="stylesheet" href="EmpowerAbilityLab.css"> 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empower Ability Labs</title>
+  <link rel="stylesheet" href="EmpowerAbilityLab.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
-  </head>
+  <header class="site-header">
+    <div class="brand">
+      <img src="images/empowerabilitylabslogo.png" alt="Empower Ability Labs logo" class="brand__mark">
+      <p class="brand__name">Empower Ability Labs</p>
+    </div>
 
-  <body>
-<div  class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <a class="navbar-brand" href="https://www.google.ca/">Empower Ability Labs Logo here</a>
-    <!-- Main Navigation for Empower Ability Labs-->
-    <nav> 
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-
-      </div>
+    <nav class="primary-nav" aria-label="Primary navigation">
+      <ul class="nav-list" role="menubar">
+        <li role="none">
+          <button type="button" class="nav-link" role="menuitem" data-route="home" aria-current="page">Home</button>
+        </li>
+        <li role="none">
+          <button type="button" class="nav-link" role="menuitem" data-route="services">Services</button>
+        </li>
+        <li role="none">
+          <button type="button" class="nav-link" role="menuitem" data-route="schedule">Schedule a Call</button>
+        </li>
+        <li role="none">
+          <button type="button" class="nav-link" role="menuitem" data-route="interactive">Interactive Tools</button>
+        </li>
+      </ul>
     </nav>
-  </div>
-    <main>
-      <!-- Main landing view -->
-      <div class="jumbotron">
-        <div class="container">
-          <h1 class="h2">Welcome to Empower Ability Labs!</h1>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-        </div>
+  </header>
+
+  <main id="main-content" class="app-main" tabindex="-1">
+    <section id="home" class="view-panel" aria-labelledby="home-heading" data-route-panel="home">
+      <div class="panel-content">
+        <h1 id="home-heading">Empowering Inclusive Digital Experiences</h1>
+        <p>
+          Empower Ability Labs builds accessible digital products that center empathy and usability. We partner with
+          organizations to create barrier-free experiences for every user, regardless of ability or device.
+        </p>
+        <p>
+          Explore our services, schedule a consultation, and try our interactive learning tools designed to deepen
+          accessibility awareness.
+        </p>
       </div>
+      <figure class="panel-media">
+        <img src="images/services.png" alt="Designers collaborating on an inclusive interface">
+        <figcaption>Consulting, training, and audits tailored to your team.</figcaption>
+      </figure>
+    </section>
 
-      <div class="container">
-        <!-- Example row of columns -->
-        <div class="row">
-          <div class="col-md-4">
-          
-              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo. </p>
+    <section id="services" class="view-panel" aria-labelledby="services-heading" data-route-panel="services">
+      <div class="panel-content">
+        <h2 id="services-heading">Services That Scale Accessibility</h2>
+        <p>
+          From compliance audits to immersive workshops, our team offers guidance anchored in WCAG 2.1 AA and inclusive
+          design best practices.
+        </p>
+        <ul class="feature-list">
+          <li>
+            <h3>Accessibility Audits</h3>
+            <p>Comprehensive assessments with actionable roadmaps and prioritized fixes.</p>
+          </li>
+          <li>
+            <h3>Team Training</h3>
+            <p>Interactive sessions that align designers, developers, and content strategists.</p>
+          </li>
+          <li>
+            <h3>Inclusive Strategy</h3>
+            <p>Holistic accessibility programs that integrate policy, process, and product delivery.</p>
+          </li>
+        </ul>
+      </div>
+      <figure class="panel-media">
+        <img src="images/services.png" alt="Workshop facilitator guiding a collaborative accessibility session">
+        <figcaption>Hands-on practice makes accessibility part of every sprint.</figcaption>
+      </figure>
+    </section>
+
+    <section id="schedule" class="view-panel" aria-labelledby="schedule-heading" data-route-panel="schedule">
+      <div class="panel-content">
+        <h2 id="schedule-heading">Schedule a Call</h2>
+        <p>Let’s build an accessibility roadmap tailored to your goals and timelines.</p>
+        <form class="cta-form" aria-describedby="schedule-form-description">
+          <p id="schedule-form-description" class="form-description">
+            Required fields are marked. Responses help us prepare resources relevant to your needs.
+          </p>
+          <div class="form-grid">
+            <label for="name" class="form-label">Name</label>
+            <input id="name" name="name" type="text" autocomplete="name" required class="form-input">
+
+            <label for="email" class="form-label">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required class="form-input">
+
+            <label for="phone" class="form-label">Phone</label>
+            <input id="phone" name="phone" type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="613-555-1234" class="form-input">
+
+            <label for="organization" class="form-label">Organization</label>
+            <input id="organization" name="organization" type="text" autocomplete="organization" class="form-input">
+
+            <label for="project-notes" class="form-label">Project Goals</label>
+            <textarea id="project-notes" name="project-notes" rows="4" class="form-input"></textarea>
           </div>
-          <div class="col-md-4">
-          
-              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo. </p>
+          <button type="submit" class="button-primary">Submit Request</button>
+        </form>
+      </div>
+      <figure class="panel-media">
+        <img src="images/scheduleacall.png" alt="Client video call discussing accessibility goals">
+        <figcaption>We collaborate remotely to meet teams where they are.</figcaption>
+      </figure>
+    </section>
+
+    <section id="interactive" class="view-panel" aria-labelledby="interactive-heading" data-route-panel="interactive">
+      <div class="panel-content">
+        <h2 id="interactive-heading">Interactive Learning Tools</h2>
+        <p>Practice using accessibility widgets designed for keyboard and screen reader users.</p>
+
+        <article class="interactive-card" aria-labelledby="toggle-heading">
+          <h3 id="toggle-heading">Accessible Toggle</h3>
+          <p>Toggle labels and state changes announce clearly through ARIA attributes.</p>
+          <div class="interactive-preview">
+            <span class="toggle" role="switch" aria-checked="false" tabindex="0">Off</span>
           </div>
-          <div class="col-md-4">
-          
-              <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo. </p>
+        </article>
+
+        <article class="interactive-card" aria-labelledby="modal-heading">
+          <h3 id="modal-heading">Modal with Focus Trap</h3>
+          <p>Focus stays inside until the modal closes; users can dismiss with the Escape key.</p>
+          <div class="interactive-preview">
+            <button type="button" class="button-secondary">Preview Modal</button>
           </div>
-        </div>
+        </article>
 
-        <hr>
+        <article class="interactive-card" aria-labelledby="textarea-heading">
+          <h3 id="textarea-heading">Show or Hide Feedback</h3>
+          <p>Conditional textarea appears when participants opt to provide detailed notes.</p>
+          <div class="interactive-preview">
+            <label class="form-label">
+              <input type="checkbox" aria-controls="feedback-sample" aria-expanded="false">
+              Share anonymous feedback
+            </label>
+            <textarea id="feedback-sample" rows="3" hidden class="form-input"></textarea>
+          </div>
+        </article>
+      </div>
+      <figure class="panel-media">
+        <img src="images/empowerabilitylabslogo.png" alt="Empower Ability Labs wordmark highlighted">
+        <figcaption>Tools shaped by lived experience and user research.</figcaption>
+      </figure>
+    </section>
+  </main>
 
-      </div> <!-- /container -->
+  <footer class="site-footer">
+    <section aria-labelledby="footer-heading" class="footer-content">
+      <h2 id="footer-heading">Let’s Build Accessibility Together</h2>
+      <p>Email <a href="mailto:hello@empowerabilitylabs.org">hello@empowerabilitylabs.org</a> or call <a href="tel:6135554567">613-555-4567</a>.</p>
+      <p class="footer-note">© <span data-current-year>2025</span> Empower Ability Labs. Accessibility for everyone.</p>
+    </section>
+  </footer>
+</body>
+</html>
 
-    </main>
-
-    <footer class="container">
-     <p>Copyright Accessible Knowledge Base 2023</p>
-    </footer>
-
-
-
-    <script src="EmpowerAbilityLab.js"></script>
-  
-
-</body></html>
