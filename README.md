@@ -12,7 +12,7 @@ The goal is to create an inclusive, keyboard-friendly, screen-reader-accessible 
 |------|----------------|------------------------|
 | Ngabo Nsengiyumva | 041196196 |  |
 | Aryan rudani | 041171391 | |
-| Trevor Oliver Kutto | 041164341 |  |
+| Trevor Oliver Kutto | 041164341 | UI and Page Functionality  |
 | Bryan Chuinkam | 040811108 |  |
 
 
