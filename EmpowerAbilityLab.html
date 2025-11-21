@@ -80,38 +80,96 @@
       </figure>
     </section>
 
-    <section id="schedule" class="view-panel" aria-labelledby="schedule-heading" data-route-panel="schedule">
-      <div class="panel-content">
-        <h2 id="schedule-heading">Schedule a Call</h2>
-        <p>Let’s build an accessibility roadmap tailored to your goals and timelines.</p>
-        <form class="cta-form" aria-describedby="schedule-form-description">
-          <p id="schedule-form-description" class="form-description">
-            Required fields are marked. Responses help us prepare resources relevant to your needs.
-          </p>
-          <div class="form-grid">
-            <label for="name" class="form-label">Name</label>
-            <input id="name" name="name" type="text" autocomplete="name" required class="form-input">
+  <section id="schedule" class="view-panel" aria-labelledby="schedule-heading" data-route-panel="schedule">
+    <div class="panel-content">
+      <h2 id="schedule-heading">Schedule a Call</h2>
+      <p>
+        At Empower Ability Labs, we are dedicated to cultivating empathy and driving positive change through
+        immersive experiences. Fill out the form below and we’ll get back to you as soon as we can to schedule
+        a call with our sales team!
+      </p>
 
-            <label for="email" class="form-label">Email</label>
-            <input id="email" name="email" type="email" autocomplete="email" required class="form-input">
+      <!-- Success / error announcements -->
+      <div id="form-status" aria-live="assertive" class="visually-hidden"></div>
 
-            <label for="phone" class="form-label">Phone</label>
-            <input id="phone" name="phone" type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="613-555-1234" class="form-input">
+      <form id="schedule-form" class="cta-form" aria-describedby="schedule-form-description" novalidate>
+        <p id="schedule-form-description" class="form-description">
+          Required fields are marked. Responses help us prepare resources relevant to your needs.
+        </p>
 
-            <label for="organization" class="form-label">Organization</label>
-            <input id="organization" name="organization" type="text" autocomplete="organization" class="form-input">
+        <div class="form-grid">
+          <!-- Business name -->
+          <label for="business" class="form-label">Business Name</label>
+          <input id="business" name="business" type="text" class="form-input">
+          <span class="error" id="business-error" aria-live="polite"></span>
 
-            <label for="project-notes" class="form-label">Project Goals</label>
-            <textarea id="project-notes" name="project-notes" rows="4" class="form-input"></textarea>
+          <!-- Phone -->
+          <label for="phone" class="form-label">Phone Number (613-123-1234)</label>
+          <input id="phone" name="phone" type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                placeholder="613-123-1234" class="form-input">
+          <span class="error" id="phone-error" aria-live="polite"></span>
+
+          <!-- Email -->
+          <label for="email" class="form-label">Email (required)</label>
+          <input id="email" name="email" type="email" required class="form-input">
+          <span class="error" id="email-error" aria-live="assertive"></span>
+
+          <!-- Topic selection -->
+          <fieldset class="form-fieldset">
+            <legend>What would you like to talk about? (required)</legend>
+
+            <div>
+              <input type="checkbox" id="topic-awareness" name="topic" value="awareness">
+              <label for="topic-awareness">Awareness lab days and workshops</label>
+            </div>
+
+            <div>
+              <input type="checkbox" id="topic-speaker" name="topic" value="speaker" aria-controls="event-details" aria-expanded="false">
+              <label for="topic-speaker">Invite a speaker with disabilities to your event</label>
+            </div>
+
+            <div>
+              <input type="checkbox" id="topic-usability" name="topic" value="usability">
+              <label for="topic-usability">Usability testing</label>
+            </div>
+
+            <span class="error" id="topic-error" aria-live="assertive"></span>
+          </fieldset>
+
+          <!-- Conditional event details -->
+          <div id="event-details" hidden>
+            <label for="event-text" class="form-label">Please tell us about your event</label>
+            <textarea id="event-text" name="event-text" rows="4" class="form-input"></textarea>
+            <span class="error" id="event-text-error" aria-live="polite"></span>
           </div>
-          <button type="submit" class="button-primary">Submit Request</button>
-        </form>
-      </div>
-      <figure class="panel-media">
-        <img src="images/scheduleacall.png" alt="Client video call discussing accessibility goals">
-        <figcaption>We collaborate remotely to meet teams where they are.</figcaption>
-      </figure>
-    </section>
+
+          <!-- Email updates switch -->
+          <div class="switch-container">
+            <label id="updates-label">Receive emails about updates and services</label>
+            <button
+              id="updates-switch"
+              type="button"
+              role="switch"
+              aria-checked="false"
+              aria-labelledby="updates-label"
+              class="switch-button"
+            >
+              <img src="images/switch-off.png" alt="" id="switch-img"> 
+            </button>
+            <input type="hidden" name="receive-updates" id="updates-value" value="false">
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="button-primary">Schedule a Call</button>
+      </form>
+    </div>
+
+    <figure class="panel-media">
+      <img src="images/scheduleacall.png" alt="Client video call discussing accessibility goals">
+      <figcaption>We collaborate remotely to meet teams where they are.</figcaption>
+    </figure>
+  </section>
 
     <section id="interactive" class="view-panel" aria-labelledby="interactive-heading" data-route-panel="interactive">
       <div class="panel-content">
@@ -160,6 +218,8 @@
       <p class="footer-note">© <span data-current-year>2025</span> Empower Ability Labs. Accessibility for everyone.</p>
     </section>
   </footer>
+    <!-- <script src="EmpowerAbilityLab.js"></script> -->
+
 </body>
 </html>
 

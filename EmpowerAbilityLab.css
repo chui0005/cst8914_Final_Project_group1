@@ -293,6 +293,12 @@ p {
   outline-offset: 3px;
 }
 
+#switch-img {
+  width: 30px;   /* adjust to the size you want */
+  height: auto;  /* keeps aspect ratio */
+  cursor: pointer;
+}
+
 .interactive-card {
   display: grid;
   gap: var(--space-sm);

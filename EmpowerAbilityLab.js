@@ -310,67 +310,78 @@
     });
   }
 
-  // 4) Show/Hide textarea for checkbox (uses aria-controls + aria-expanded) 
+  // 4) Show/Hide textarea for checkbox (uses aria-controls + aria-expanded)  
+  // SHOULD WORK BUT NEEDS TO BE TESTED (BRYAN)
   function initShowHideTextareas() {
-    // Finds checkbox inputs that declare aria-controls
-    const controllers = qsa('.interactive-preview input[type="checkbox"][aria-controls], input[type="checkbox"][aria-controls]');
-    if (!controllers.length) {
-      console.info('No checkbox controllers with aria-controls found — skipping show/hide init.');
-      return;
-    }
+      
+    // Switch toggle
+    const switchBtn = document.getElementById("updates-switch");
+    const switchImg = document.getElementById("switch-img");
+    const updatesValue = document.getElementById("updates-value");
 
-    // create announcer for live region
-    let announcer = qs('#empower-announcer');
-    if (!announcer) {
-      announcer = document.createElement('div');
-      announcer.id = 'empower-announcer';
-      announcer.setAttribute('aria-live', 'polite');
-      announcer.setAttribute('aria-atomic', 'true');
-      announcer.style.position = 'absolute';
-      announcer.style.left = '-9999px';
-      announcer.style.width = '1px';
-      announcer.style.height = '1px';
-      announcer.style.overflow = 'hidden';
-      document.body.appendChild(announcer);
-    }
+    switchBtn.addEventListener("click", () => {
+      const isOn = switchBtn.getAttribute("aria-checked") === "true";
+      switchBtn.setAttribute("aria-checked", !isOn);
+      updatesValue.value = !isOn;
+      switchImg.src = !isOn ? "images/switch-on.png" : "images/switch-off.png";
+    });
 
-    controllers.forEach(chk => {
-      const targetId = chk.getAttribute('aria-controls');
-      const target = qs(`#${CSS.escape(targetId)}`);
-      if (!target) {
-        console.warn('Checkbox aria-controls target not found:', targetId);
+    // Show conditional text area only when "invite speaker" is checked
+    const speakerCheckbox = document.getElementById("topic-speaker");
+    const details = document.getElementById("event-details");
+
+    speakerCheckbox.addEventListener("change", () => {
+      const expanded = speakerCheckbox.checked;
+      details.hidden = !expanded;
+      speakerCheckbox.setAttribute("aria-expanded", expanded);
+    });
+
+    // Form validation + notification
+    const form = document.getElementById("schedule-form");
+    const status = document.getElementById("form-status");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      // Clear previous messages
+      status.textContent = "";
+      document.querySelectorAll(".error").forEach(el => el.textContent = "");
+
+      // Validate email
+      const email = document.getElementById("email");
+      if (!email.value.trim() || !email.checkValidity()) {
+        document.getElementById("email-error").textContent = "A valid email is required.";
+        valid = false;
+      }
+
+      // Validate topic
+      const topics = [...document.querySelectorAll("input[name='topic']:checked")];
+      if (topics.length === 0) {
+        document.getElementById("topic-error").textContent = "Select at least one topic.";
+        valid = false;
+      }
+
+      // Validate event description if that checkbox is selected
+      if (speakerCheckbox.checked) {
+        const eventText = document.getElementById("event-text");
+        if (!eventText.value.trim()) {
+          document.getElementById("event-text-error").textContent =
+            "Please describe your event for speaker requests.";
+          valid = false;
+        }
+      }
+
+      // Notify user
+      if (!valid) {
+        status.textContent = "There were errors with your submission. Please review the form.";
         return;
       }
 
-      // initialize aria-expanded
-      const isChecked = chk.checked;
-      chk.setAttribute('aria-expanded', String(Boolean(isChecked)));
-      updateTarget(target, Boolean(isChecked), announcer);
-
-      // events
-      chk.addEventListener('change', () => {
-        const checkedNow = chk.checked;
-        chk.setAttribute('aria-expanded', String(Boolean(checkedNow)));
-        updateTarget(target, Boolean(checkedNow), announcer);
-      });
-
-      // also keyboard on the label / custom cases are handled by native checkbox
+      status.textContent = "Thank you! Your request has been submitted successfully.";
+      form.reset();
+      details.hidden = true;
     });
-
-    function updateTarget(target, show, announcerEl) {
-      if (show) {
-        target.removeAttribute('hidden');
-        target.style.display = '';
-        announcerEl.textContent = 'Feedback textarea shown';
-        // ensures it is focusable
-        target.setAttribute('tabindex', '0');
-      } else {
-        target.setAttribute('hidden', 'true');
-        target.style.display = 'none';
-        announcerEl.textContent = 'Feedback textarea hidden';
-        target.setAttribute('tabindex', '-1');
-      }
-    }
   }
 
   //  Boot 
