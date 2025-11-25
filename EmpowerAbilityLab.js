@@ -5,60 +5,134 @@
   // ---------- Helpers ----------
   const qs = (s, root = document) => root.querySelector(s);
   const qsa = (s, root = document) => Array.from(root.querySelectorAll(s));
-  const isVisible = el => !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
+  // Checks if an element is visible (accounts for display: none and visibility: hidden)
+  const isVisible = el => !!(el && el.offsetParent !== null && getComputedStyle(el).visibility !== 'hidden' && getComputedStyle(el).display !== 'none');
 
+  // List of standard focusable elements
   const FOCUSABLE = [
-    'a[href]',
+    'a[href]:not([disabled])',
     'button:not([disabled])',
     'input:not([disabled]):not([type="hidden"])',
     'select:not([disabled])',
     'textarea:not([disabled])',
     '[tabindex]:not([tabindex="-1"])',
-    '[role="switch"]'
+    '[role="switch"]' // Include custom switch component
   ].join(',');
 
-  // 1) Menubar + routing
+  const ROUTE_TITLES = {
+    'home': 'Home | Empower Ability Labs',
+    'services': 'Services | Empower Ability Labs',
+    'schedule': 'Schedule a Call | Empower Ability Labs',
+    'interactive': 'Interactive Tools | Empower Ability Labs'
+  };
+
+  /**
+   * 1) Menubar + Routing (Roving Tabindex, History API, Focus Management, Page Title)
+   */
   function initMenubarAndRouting() {
     const menubar = qs('.nav-list[role="menubar"]');
-    if (!menubar) {
-      console.info('No menubar (.nav-list[role="menubar"]) found — skipping menubar init.');
+    const main = qs('#main-content');
+    if (!menubar || !main) {
+      console.error('Missing menubar or main content — skipping routing init.');
       return;
     }
 
     const items = qsa('.nav-link', menubar).filter(Boolean);
+    const panels = qsa('[data-route-panel]');
 
-    if (!items.length) {
-      console.info('No .nav-link items found inside menubar.');
+    if (!items.length || !panels.length) {
+      console.warn('Missing navigation items or route panels.');
       return;
     }
 
-    // Roving tabindex 
-    items.forEach((btn, i) => {
-      btn.setAttribute('role', 'menuitem'); // ensure role
-      btn.setAttribute('tabindex', i === 0 ? '0' : '-1');
-      // keyboard activation: Enter/Space activates route
-      btn.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          btn.click();
+    /**
+     * Updates the tabindex for the Roving Tabindex pattern.
+     * @param {HTMLElement[]} list - Array of navigations links.
+     * @param {number} idx - Index of the item to set tabindex="0" and focus.
+     */
+    function setRoving(list, idx) {
+      list.forEach((el, i) => el.setAttribute('tabindex', i === idx ? '0' : '-1'));
+      const el = list[idx];
+      if (el && typeof el.focus === 'function') el.focus();
+    }
+
+    /**
+     * Executes the SPA navigation.
+     * @param {string} route - The route key (e.g., 'home', 'services').
+     * @param {boolean} [pushState=true] - Whether to add a new entry to the browser history.
+     */
+    function navigateTo(route, pushState = true) {
+      if (!route) return;
+
+      // 1. Show/Hide Panel
+      const targetPanel = panels.find(p => p.getAttribute('data-route-panel') === route);
+
+      panels.forEach(p => {
+        if (p === targetPanel) {
+          p.removeAttribute('hidden');
+          p.style.display = ''; // Restore CSS display
+        } else {
+          p.setAttribute('hidden', 'true');
+          p.style.display = 'none';
         }
       });
-      // click -> navigate
+
+      // 2. Update Nav ARIA state and Roving Tabindex
+      items.forEach(it => {
+        if (it.getAttribute('data-route') === route) {
+          it.setAttribute('aria-current', 'page');
+          it.setAttribute('tabindex', '0'); // Set current as focusable (for screen readers)
+        } else {
+          it.removeAttribute('aria-current');
+          it.setAttribute('tabindex', '-1');
+        }
+      });
+      
+      // Update Roving tabindex to current link
+      const currentLink = items.find(it => it.getAttribute('data-route') === route);
+      if (currentLink) {
+          const currentIdx = items.indexOf(currentLink);
+          setRoving(items, currentIdx);
+      }
+
+
+      // 3. History API (URL and Back/Forward Sync)
+      const path = `#${route}`;
+      if (pushState) {
+        window.history.pushState({ route }, ROUTE_TITLES[route] || 'Empower Ability Labs', path);
+      }
+      
+      // 4. Update Page Title
+      document.title = ROUTE_TITLES[route] || 'Empower Ability Labs';
+
+      // 5. Focus Management (Shift focus to the page's main heading)
+      const targetHeading = targetPanel ? qs('h1, h2', targetPanel) : null;
+      if (targetHeading) {
+        // Use heading if available, otherwise use main content area
+        targetHeading.setAttribute('tabindex', '-1'); // Make heading focusable
+        targetHeading.focus();
+        targetHeading.removeAttribute('tabindex'); // Remove tabindex so it's not permanently in tab order
+      } else {
+        main.focus();
+      }
+    }
+
+    // Nav item click event
+    items.forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         const route = btn.getAttribute('data-route');
-        if (route) {
-          navigateTo(route);
-        }
-        // updated roving tabindex: making this item tabbable
-        setRoving(items, items.indexOf(btn));
+        navigateTo(route);
       });
+      // Keyboard activation (Enter/Space on menuitem) handled below, but click works too
     });
 
-    // Arrow navigation on menubar (left/right/home/end)
+    // Arrow navigation on menubar (left/right/home/end) - Roving Tabindex implementation
     menubar.addEventListener('keydown', (e) => {
       const activeIndex = items.findIndex(it => it.getAttribute('tabindex') === '0');
       let nextIndex = -1;
+      let prevent = true; // Default to prevent browser key scrolling
+
       switch (e.key) {
         case 'ArrowRight':
           nextIndex = (activeIndex + 1) % items.length;
@@ -73,71 +147,86 @@
           nextIndex = items.length - 1;
           break;
         default:
+          prevent = false;
           break;
       }
-      if (nextIndex >= 0) {
-        e.preventDefault();
+      if (prevent) e.preventDefault();
+      
+      if (nextIndex >= 0 && nextIndex !== activeIndex) {
         setRoving(items, nextIndex);
+      } else if (nextIndex === activeIndex) {
+          // ensure current item is focused if a valid key was pressed but index didn't change
+          items[activeIndex].focus();
       }
     });
 
-    function setRoving(list, idx) {
-      list.forEach((el, i) => el.setAttribute('tabindex', i === idx ? '0' : '-1'));
-      const el = list[idx];
-      if (el && typeof el.focus === 'function') el.focus();
-    }
+    // History API: Handle back/forward button
+    window.addEventListener('popstate', (e) => {
+      const route = e.state ? e.state.route : (window.location.hash.substring(1) || items[0].getAttribute('data-route'));
+      navigateTo(route, false); // Don't push a new state
+    });
 
-    // Simple in-page routing: show section[data-route-panel="<route>"]
-    const panels = qsa('[data-route-panel]');
-    function navigateTo(route) {
-      if (!route) return;
-      panels.forEach(p => {
-        if (p.getAttribute('data-route-panel') === route) {
-          p.removeAttribute('hidden');
-          p.style.display = ''; // CSS handles layout
-        } else {
-          p.setAttribute('hidden', 'true');
-          p.style.display = 'none';
-        }
-      });
-
-      // updated aria-current on nav items
-      items.forEach(it => {
-        if (it.getAttribute('data-route') === route) {
-          it.setAttribute('aria-current', 'page');
-        } else {
-          it.removeAttribute('aria-current');
-        }
-      });
-
-      // moves focus to main content and set focusable for screenreaders
-      const main = qs('#main-content');
-      if (main) {
-        main.focus();
-      }
-    }
-
-    // Initialize: reveals first panel that matches any nav with aria-current or default to first nav route
-    const current = items.find(it => it.getAttribute('aria-current') === 'page');
-    if (current) {
-      navigateTo(current.getAttribute('data-route'));
-    } else {
-      // default to first nav's route
-      const firstRoute = items[0].getAttribute('data-route');
-      if (firstRoute) navigateTo(firstRoute);
-    }
+    // Initial load: determine starting route
+    const initialRoute = window.location.hash.substring(1) || items[0].getAttribute('data-route');
+    navigateTo(initialRoute, false); // Don't push state on initial load
   }
 
-  // 2) Modal (dynamic)
+  /**
+   * 2) Modal (dynamic) with Focus Trap and ESC close
+   */
   function initModal() {
-    // trigger in interactive card: the button with class .button-secondary
-    const modalTrigger = qs('.interactive-card [class*="button-secondary"], .interactive-preview .button-secondary');
+    // The button that triggers the modal
+    const modalTrigger = qs('#interactive [class*="button-secondary"]');
     if (!modalTrigger) {
       console.info('No modal trigger (.button-secondary) found in interactive area — skipping modal init.');
       return;
     }
 
-    // Create modal DOM when needed
+    // Modal CSS/DOM additions for presentation:
+    // This is not in the provided CSS, but is needed for a functional modal.
+    const modalStyles = `
+      .empower-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(16, 37, 66, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      .empower-modal {
+        background-color: var(--color-surface-alt);
+        padding: 2rem;
+        border-radius: var(--radius-md);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+        max-width: 90vw;
+        width: 450px;
+        position: relative;
+      }
+      .empower-modal__close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        background: transparent;
+        border: 2px solid var(--color-ink);
+        cursor: pointer;
+      }
+      .empower-modal__content {
+          display: grid;
+          gap: 1rem;
+      }
+    `;
+    const styleTag = document.createElement('style');
+    styleTag.textContent = modalStyles;
+    document.head.appendChild(styleTag);
+
+
+    let modalInstance = null; // Stores the single modal object
+    let previouslyFocused = null;
+
+    // Creates the modal DOM structure and its methods
     function buildModal() {
       const overlay = document.createElement('div');
       overlay.className = 'empower-modal-overlay';
@@ -148,14 +237,14 @@
       dialog.setAttribute('role', 'dialog');
       dialog.setAttribute('aria-modal', 'true');
       dialog.setAttribute('aria-labelledby', 'empower-modal-heading');
-      dialog.setAttribute('tabindex', '-1');
+      dialog.setAttribute('tabindex', '-1'); // For initial focus if no focusable children
 
       const content = document.createElement('div');
       content.className = 'empower-modal__content';
 
       const closeBtn = document.createElement('button');
       closeBtn.className = 'empower-modal__close';
-      closeBtn.setAttribute('aria-label', 'Close dialog');
+      closeBtn.setAttribute('aria-label', 'Close interactive modal');
       closeBtn.type = 'button';
       closeBtn.textContent = 'Close';
 
@@ -164,16 +253,18 @@
       heading.textContent = 'Interactive Modal Preview';
 
       const para = document.createElement('p');
-      para.textContent = 'This is a demonstration modal with focus trap. Press Escape to close or click outside the dialog.';
+      para.textContent = 'This is a demonstration modal with a focus trap. Press **Escape** to close, click the close button, or click outside the dialog.';
 
-      // add example focusable controls inside modal
+      // Add example focusable controls inside modal
       const exampleInput = document.createElement('input');
       exampleInput.type = 'text';
       exampleInput.placeholder = 'Type here';
+      exampleInput.className = 'form-input';
 
       const actionBtn = document.createElement('button');
       actionBtn.type = 'button';
-      actionBtn.textContent = 'Action';
+      actionBtn.textContent = 'Take Action';
+      actionBtn.className = 'button-primary';
 
       content.appendChild(closeBtn);
       content.appendChild(heading);
@@ -183,36 +274,48 @@
       dialog.appendChild(content);
       overlay.appendChild(dialog);
 
-      // hook behaviors
+      // Utility to find all focusable elements within the modal
+      function getFocusable(container) {
+        return qsa(FOCUSABLE, container).filter(isVisible);
+      }
+
       function open() {
+        previouslyFocused = document.activeElement; // Save reference to the element that triggered the modal
+        
         document.body.appendChild(overlay);
-        // hides main app for assistive tech
+        
+        // Hide main application content for screen readers
         const main = qs('#main-content');
         if (main) main.setAttribute('aria-hidden', 'true');
 
-        // focus management
+        // Initial focus management: focus first element or the dialog itself
         const focusables = getFocusable(dialog);
         (focusables.length ? focusables[0] : dialog).focus();
 
-        // listeners
+        // Add event listeners
         overlay.addEventListener('click', overlayClick);
         document.addEventListener('keydown', onKeyDown);
         closeBtn.addEventListener('click', close);
       }
 
       function close() {
-        // remove listeners
+        // Remove listeners
         overlay.removeEventListener('click', overlayClick);
         document.removeEventListener('keydown', onKeyDown);
+        
+        // Remove modal from DOM
         if (overlay.parentElement) overlay.parentElement.removeChild(overlay);
+        
+        // Restore main content accessibility
         const main = qs('#main-content');
         if (main) main.removeAttribute('aria-hidden');
-        // restore focus to trigger
-        modalTrigger.focus();
+        
+        // Restore focus to the trigger button
+        if (previouslyFocused) previouslyFocused.focus();
       }
 
       function overlayClick(e) {
-        // if click outside dialog content (i.e., target is overlay), close
+        // Close if the click target is the overlay itself (i.e., not a child element)
         if (e.target === overlay) close();
       }
 
@@ -223,7 +326,7 @@
           return;
         }
         if (e.key === 'Tab') {
-          // focus trap inside dialog
+          // Focus trap inside dialog
           const focusables = getFocusable(dialog);
           if (focusables.length === 0) {
             e.preventDefault();
@@ -232,30 +335,30 @@
           const first = focusables[0];
           const last = focusables[focusables.length - 1];
           const active = document.activeElement;
+          
           if (!e.shiftKey && active === last) {
+            // Tab from last element loops to first
             e.preventDefault();
             first.focus();
           } else if (e.shiftKey && active === first) {
+            // Shift+Tab from first element loops to last
             e.preventDefault();
             last.focus();
           }
         }
       }
 
-      function getFocusable(container) {
-        return qsa(FOCUSABLE, container).filter(isVisible);
-      }
-
       return { open, close };
     }
 
-    let modalInstance = null;
+    // Modal Trigger handler
     modalTrigger.addEventListener('click', (e) => {
       e.preventDefault();
       if (!modalInstance) modalInstance = buildModal();
       modalInstance.open();
     });
 
+    // Allow Enter/Space on the button to open the modal
     modalTrigger.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -264,147 +367,247 @@
     });
   }
 
-  // 3) Switch component 
+  /**
+   * 3) ARIA-compliant Toggle/Switch component
+   */
   function initSwitches() {
-    const switches = qsa('.interactive-preview [role="switch"], .toggle[role="switch"], span.toggle[role="switch"]');
+    // Find switches in both interactive area and the form
+    const switches = qsa('.interactive-preview [role="switch"], #updates-switch');
     if (!switches.length) {
       console.info('No switches found (role="switch") — skipping switch init.');
       return;
     }
 
     switches.forEach(s => {
-      // ensure attributes
+      // Ensure role and state are set
+      s.setAttribute('role', 'switch');
       if (!s.hasAttribute('tabindex')) s.setAttribute('tabindex', '0');
       if (!s.hasAttribute('aria-checked')) s.setAttribute('aria-checked', 'false');
 
-      // initializes visual text if present
-      updateSwitchText(s);
-
+      /**
+       * Toggles the state of the switch.
+       */
       function toggle() {
         const current = s.getAttribute('aria-checked') === 'true';
-        s.setAttribute('aria-checked', String(!current));
-        updateSwitchText(s);
-        s.dispatchEvent(new CustomEvent('empower:switch', { detail: { checked: !current } }));
-      }
-
-      function updateSwitchText(el) {
-        try {
-          const checked = el.getAttribute('aria-checked') === 'true';
-          // keeps simple visible label
-          el.textContent = checked ? 'On' : 'Off';
-        } catch (err) {
+        const newState = !current;
+        s.setAttribute('aria-checked', String(newState));
+        
+        // Handle visual update specific to the simple 'Off'/'On' switch
+        if (s.classList.contains('toggle')) {
+          s.textContent = newState ? 'On' : 'Off';
         }
+
+        // Handle the switch in the form, which uses images
+        if (s.id === 'updates-switch') {
+          const switchImg = document.getElementById("switch-img");
+          const updatesValue = document.getElementById("updates-value");
+          if (switchImg) {
+            switchImg.src = newState ? "images/switch-on.png" : "images/switch-off.png";
+          }
+          if (updatesValue) {
+            updatesValue.value = String(newState); // Update the hidden form value
+          }
+        }
+        
+        // Custom event for external logic (optional)
+        s.dispatchEvent(new CustomEvent('empower:switch', { detail: { checked: newState } }));
       }
 
+      // Toggle on click
       s.addEventListener('click', (e) => {
         e.preventDefault();
         toggle();
       });
 
+      // Toggle on Enter or Space
       s.addEventListener('keydown', (e) => {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
           toggle();
         }
       });
+      
+      // Initialize the visual state for the interactive toggle (form switch initialized in part 4)
+      if (s.classList.contains('toggle')) {
+          toggle(); // Run once to set initial visual state based on aria-checked
+          toggle(); // Run again to restore initial state and set text content
+      }
     });
   }
 
-  // 4) Show/Hide textarea for checkbox (uses aria-controls + aria-expanded)  
-  // SHOULD WORK BUT NEEDS TO BE TESTED (BRYAN)
-  function initShowHideTextareas() {
-      
-    // Switch toggle
-    const switchBtn = document.getElementById("updates-switch");
-    const switchImg = document.getElementById("switch-img");
-    const updatesValue = document.getElementById("updates-value");
-
-    switchBtn.addEventListener("click", () => {
-      const isOn = switchBtn.getAttribute("aria-checked") === "true";
-      switchBtn.setAttribute("aria-checked", !isOn);
-      updatesValue.value = !isOn;
-      switchImg.src = !isOn ? "images/switch-on.png" : "images/switch-off.png";
-    });
-
-    // Show conditional text area only when "invite speaker" is checked
-    const speakerCheckbox = document.getElementById("topic-speaker");
-    const details = document.getElementById("event-details");
-
-    speakerCheckbox.addEventListener("change", () => {
-      const expanded = speakerCheckbox.checked;
-      details.hidden = !expanded;
-      speakerCheckbox.setAttribute("aria-expanded", expanded);
-    });
-
-    // Form validation + notification
+  /**
+   * 4) Conditional UI (Show/Hide textarea) + Form Validation
+   */
+  function initForm() {
     const form = document.getElementById("schedule-form");
     const status = document.getElementById("form-status");
+    const speakerCheckbox = document.getElementById("topic-speaker");
+    const eventDetails = document.getElementById("event-details");
+    const eventText = document.getElementById("event-text");
+    const formToggleCheckbox = qs('#interactive .interactive-preview input[type="checkbox"]');
+    const formToggleTextarea = qs('#interactive #feedback-sample');
 
+    if (!form) {
+      console.info('No schedule form found — skipping form init.');
+      return;
+    }
+
+    // --- Conditional UI: Form 'Schedule a Call' Page ---
+    // Show conditional text area only when "invite speaker" is checked
+    speakerCheckbox.addEventListener("change", () => {
+      const expanded = speakerCheckbox.checked;
+      eventDetails.hidden = !expanded; // Use the hidden attribute for true hiding
+      // Update ARIA-expanded state on the control
+      speakerCheckbox.setAttribute("aria-expanded", String(expanded));
+      
+      // Clear event text if un-checked
+      if (!expanded) {
+          eventText.value = '';
+          document.getElementById("event-text-error").textContent = ""; // Clear error
+      }
+    });
+
+    // --- Conditional UI: 'Interactive Tools' Page ---
+    if (formToggleCheckbox && formToggleTextarea) {
+        formToggleCheckbox.addEventListener("change", () => {
+            const expanded = formToggleCheckbox.checked;
+            formToggleTextarea.hidden = !expanded;
+            formToggleCheckbox.setAttribute("aria-expanded", String(expanded));
+        });
+    }
+
+    // --- Form Validation ---
+    
+    // Validates the phone field against the pattern
+    function validatePhone(input) {
+        const phonePattern = new RegExp(input.getAttribute('pattern'));
+        return !input.value || phonePattern.test(input.value); // Valid if empty or matches pattern
+    }
+    
+    /**
+     * Shows error messages next to the field and returns true if field is valid.
+     * @param {HTMLElement} input - The form control element.
+     * @param {string} msg - The error message to display.
+     * @returns {boolean} - true if valid, false if invalid.
+     */
+    function showFieldValidation(input, msg) {
+        const errorEl = document.getElementById(input.id + "-error");
+        if (!errorEl) return true; // Can't show error, so assume valid
+
+        if (msg) {
+            errorEl.textContent = msg;
+            input.setAttribute('aria-invalid', 'true');
+            return false;
+        } else {
+            errorEl.textContent = '';
+            input.removeAttribute('aria-invalid');
+            return true;
+        }
+    }
+    
+    // Attach blur listeners for immediate feedback on critical fields
+    const email = document.getElementById("email");
+    const phone = document.getElementById("phone");
+
+    email.addEventListener('blur', () => {
+        showFieldValidation(email, email.value.trim() && email.checkValidity() ? '' : "A valid email is required.");
+    });
+    
+    phone.addEventListener('blur', () => {
+        showFieldValidation(phone, validatePhone(phone) ? '' : "Phone number must be in the format 613-123-1234.");
+    });
+
+
+    // Submit handler
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       let valid = true;
+      let firstErrorField = null;
 
-      // Clear previous messages
+      // 1. Clear previous messages
       status.textContent = "";
-      document.querySelectorAll(".error").forEach(el => el.textContent = "");
+      qsa(".error").forEach(el => el.textContent = "");
+      qsa('input, textarea').forEach(el => el.removeAttribute('aria-invalid'));
 
-      // Validate email
-      const email = document.getElementById("email");
+      // 2. Validate Email (required + format)
       if (!email.value.trim() || !email.checkValidity()) {
-        document.getElementById("email-error").textContent = "A valid email is required.";
+        showFieldValidation(email, "A valid email is required.");
         valid = false;
+        if (!firstErrorField) firstErrorField = email;
       }
-
-      // Validate topic
-      const topics = [...document.querySelectorAll("input[name='topic']:checked")];
-      if (topics.length === 0) {
-        document.getElementById("topic-error").textContent = "Select at least one topic.";
-        valid = false;
-      }
-
-      // Validate event description if that checkbox is selected
-      if (speakerCheckbox.checked) {
-        const eventText = document.getElementById("event-text");
-        if (!eventText.value.trim()) {
-          document.getElementById("event-text-error").textContent =
-            "Please describe your event for speaker requests.";
+      
+      // 3. Validate Phone (pattern)
+      if (!validatePhone(phone)) {
+          showFieldValidation(phone, "Phone number must be in the format 613-123-1234.");
           valid = false;
-        }
+          if (!firstErrorField) firstErrorField = phone;
       }
 
-      // Notify user
+      // 4. Validate Topic (at least one checkbox checked)
+      const topics = qsa("input[name='topic']:checked");
+      const topicErrorEl = document.getElementById("topic-error");
+      const topicFieldset = qs('.form-fieldset'); // Closest fieldset or relevant element
+      if (topics.length === 0) {
+        topicErrorEl.textContent = "Select at least one topic.";
+        topicFieldset.setAttribute('aria-invalid', 'true');
+        valid = false;
+        if (!firstErrorField) firstErrorField = topicFieldset;
+      } else {
+          topicFieldset.removeAttribute('aria-invalid');
+      }
+
+      // 5. Validate Event Description if checkbox is selected
+      if (speakerCheckbox.checked && !eventText.value.trim()) {
+        showFieldValidation(eventText, "Please describe your event for speaker requests.");
+        valid = false;
+        if (!firstErrorField) firstErrorField = eventText;
+      }
+      
+      // 6. Focus on first error and announce failure
       if (!valid) {
-        status.textContent = "There were errors with your submission. Please review the form.";
-        return;
+        if (firstErrorField) firstErrorField.focus();
+        // Announce error count in ARIA live region
+        status.setAttribute('class', 'form-status error-status');
+        status.textContent = "Submission failed: Please correct the highlighted errors.";
+      } else {
+        // 7. Successful Submission
+        status.setAttribute('class', 'form-status success-status');
+        status.textContent = "Thank you! Your call has been successfully scheduled. We will be in touch soon.";
+        
+        // Reset form and UI elements
+        form.reset();
+        eventDetails.hidden = true;
+        speakerCheckbox.setAttribute("aria-expanded", "false");
+        
+        // Reset the updates switch
+        const switchBtn = document.getElementById("updates-switch");
+        const switchImg = document.getElementById("switch-img");
+        const updatesValue = document.getElementById("updates-value");
+        switchBtn.setAttribute("aria-checked", "false");
+        updatesValue.value = "false";
+        switchImg.src = "images/switch-off.png";
       }
-
-      status.textContent = "Thank you! Your request has been submitted successfully.";
-      form.reset();
-      details.hidden = true;
     });
   }
-
-  //  Boot 
-  function knowledgeRunner() {
-    document.addEventListener('DOMContentLoaded', () => {
-      try {
-        initMenubarAndRouting();
-        initModal();
-        initSwitches();
-        initShowHideTextareas();
-      } catch (err) {
-        console.error('EmpowerAbilityLab.js initialization error:', err);
-      }
-    });
+  
+  /**
+   * 5) Update footer year on load
+   */
+  function initFooterYear() {
+    const yearSpan = qs('[data-current-year]');
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
+    }
   }
 
-  // expose for testing
-  window.EmpowerAbilityLab = {
-    initMenubarAndRouting,
-    initModal,
-    initSwitches,
-    initShowHideTextareas
-  };
 
-  knowledgeRunner();
+  // Initialize all components
+  document.addEventListener('DOMContentLoaded', () => {
+    initFooterYear();
+    initMenubarAndRouting();
+    initModal();
+    initSwitches(); // Initializes interactive switches
+    initForm(); // Initializes form switch, conditional UI, and validation
+  });
+
 })();
