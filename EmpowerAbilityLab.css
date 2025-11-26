@@ -1,3 +1,4 @@
+
 :root {
   color-scheme: light;
   font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -256,6 +257,34 @@ p {
   accent-color: var(--color-highlight);
 }
 
+.form-fieldset {
+  grid-column: 1 / -1;
+  border: 1px solid var(--color-border);
+  border-radius: 0.65rem;
+  padding: var(--space-md);
+  margin: 0;
+}
+
+.form-fieldset legend {
+  font-weight: 600;
+  color: var(--color-ink);
+  padding: 0 var(--space-xs);
+}
+
+.form-fieldset label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+#switch-img {
+  width: 72px;
+  height: 36px;
+  margin-right: var(--space-sm);
+  vertical-align: middle;
+}
+
 .button-primary,
 .button-secondary {
   justify-self: start;
@@ -291,12 +320,6 @@ p {
 .nav-link:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 3px;
-}
-
-#switch-img {
-  width: 30px;   /* adjust to the size you want */
-  height: auto;  /* keeps aspect ratio */
-  cursor: pointer;
 }
 
 .interactive-card {
@@ -406,4 +429,5 @@ p {
     scroll-behavior: auto !important;
   }
 }
+
 
