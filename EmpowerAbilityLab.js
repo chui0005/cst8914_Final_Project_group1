@@ -46,7 +46,7 @@
     }
 
     /**
-     * Updates the tabindex for the Roving Tabindex pattern.
+     * Updates the tabindex for the Roving Tabindex pattern (only for arrow key navigation).
      * @param {HTMLElement[]} list - Array of navigations links.
      * @param {number} idx - Index of the item to set tabindex="0" and focus.
      */
@@ -54,6 +54,13 @@
       list.forEach((el, i) => el.setAttribute('tabindex', i === idx ? '0' : '-1'));
       const el = list[idx];
       if (el && typeof el.focus === 'function') el.focus();
+    }
+
+    /**
+     * Resets all nav items to be in normal tab order (tabindex="0").
+     */
+    function resetTabOrder(list) {
+      list.forEach((el) => el.setAttribute('tabindex', '0'));
     }
 
     /**
@@ -77,23 +84,16 @@
         }
       });
 
-      // 2. Update Nav ARIA state and Roving Tabindex
+      // 2. Update Nav ARIA state (keep all items in tab order)
       items.forEach(it => {
         if (it.getAttribute('data-route') === route) {
           it.setAttribute('aria-current', 'page');
-          it.setAttribute('tabindex', '0'); // Set current as focusable (for screen readers)
         } else {
           it.removeAttribute('aria-current');
-          it.setAttribute('tabindex', '-1');
         }
+        // Keep all items in normal tab order
+        it.setAttribute('tabindex', '0');
       });
-      
-      // Update Roving tabindex to current link
-      const currentLink = items.find(it => it.getAttribute('data-route') === route);
-      if (currentLink) {
-          const currentIdx = items.indexOf(currentLink);
-          setRoving(items, currentIdx);
-      }
 
 
       // 3. History API (URL and Back/Forward Sync)
@@ -127,18 +127,38 @@
       // Keyboard activation (Enter/Space on menuitem) handled below, but click works too
     });
 
+    // Track if we're in arrow key navigation mode
+    let arrowKeyMode = false;
+
     // Arrow navigation on menubar (left/right/home/end) - Roving Tabindex implementation
+    // Only applies roving tabindex when arrow keys are used, Tab key works normally
     menubar.addEventListener('keydown', (e) => {
-      const activeIndex = items.findIndex(it => it.getAttribute('tabindex') === '0');
+      // If Tab is pressed, reset to normal tab order immediately
+      if (e.key === 'Tab') {
+        resetTabOrder(items);
+        arrowKeyMode = false;
+        return; // Let Tab work normally
+      }
+
+      // Only handle arrow keys, Home, End
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') {
+        return; // Let other keys work normally
+      }
+
+      e.preventDefault(); // Prevent default scrolling for arrow keys
+      arrowKeyMode = true;
+      
+      // Find currently focused item
+      const activeIndex = items.findIndex(it => it === document.activeElement);
+      const currentFocused = activeIndex >= 0 ? activeIndex : 0;
       let nextIndex = -1;
-      let prevent = true; // Default to prevent browser key scrolling
 
       switch (e.key) {
         case 'ArrowRight':
-          nextIndex = (activeIndex + 1) % items.length;
+          nextIndex = (currentFocused + 1) % items.length;
           break;
         case 'ArrowLeft':
-          nextIndex = (activeIndex - 1 + items.length) % items.length;
+          nextIndex = (currentFocused - 1 + items.length) % items.length;
           break;
         case 'Home':
           nextIndex = 0;
@@ -146,17 +166,27 @@
         case 'End':
           nextIndex = items.length - 1;
           break;
-        default:
-          prevent = false;
-          break;
       }
-      if (prevent) e.preventDefault();
       
-      if (nextIndex >= 0 && nextIndex !== activeIndex) {
+      if (nextIndex >= 0 && nextIndex !== currentFocused) {
+        // Apply roving tabindex for arrow navigation
         setRoving(items, nextIndex);
-      } else if (nextIndex === activeIndex) {
-          // ensure current item is focused if a valid key was pressed but index didn't change
-          items[activeIndex].focus();
+      }
+    });
+
+    // Reset tab order when focus leaves the menubar
+    menubar.addEventListener('focusout', (e) => {
+      // If focus moved outside the menubar, reset all items to normal tab order
+      if (!menubar.contains(e.relatedTarget)) {
+        resetTabOrder(items);
+        arrowKeyMode = false;
+      }
+    });
+
+    // Also reset when focus enters menubar via Tab (not arrow keys)
+    menubar.addEventListener('focusin', (e) => {
+      if (!arrowKeyMode && e.target.classList.contains('nav-link')) {
+        resetTabOrder(items);
       }
     });
 
@@ -165,6 +195,9 @@
       const route = e.state ? e.state.route : (window.location.hash.substring(1) || items[0].getAttribute('data-route'));
       navigateTo(route, false); // Don't push a new state
     });
+
+    // Initialize all nav items to be in normal tab order
+    resetTabOrder(items);
 
     // Initial load: determine starting route
     const initialRoute = window.location.hash.substring(1) || items[0].getAttribute('data-route');
