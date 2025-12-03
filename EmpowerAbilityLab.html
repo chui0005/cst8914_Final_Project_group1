@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Empower Ability Labs</title>
   <link rel="stylesheet" href="EmpowerAbilityLab.css">
 </head>
+
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
@@ -36,15 +38,23 @@
   <main id="main-content" class="app-main" tabindex="-1">
     <section id="home" class="view-panel" aria-labelledby="home-heading" data-route-panel="home">
       <div class="panel-content">
-        <h1 id="home-heading">Empowering Inclusive Digital Experiences</h1>
+        <h1 id="home-heading">Welcome to Empower Ability Labs! </h1>
         <p>
-          Empower Ability Labs builds accessible digital products that center empathy and usability. We partner with
-          organizations to create barrier-free experiences for every user, regardless of ability or device.
+          Empower Ability Labs is a hub for learning and empathy-building. We are on a mission to foster understanding
+          and promote inclusive digital experiences for all. We offer a range of services designed to promote
+          accessibility awareness, drive inclusivity, and enhance the user experience. And help you find answers on How
+          do people with disabilities use technology and navigate the digital world? What tools do they employ?
         </p>
-        <p>
+
+        <div style="margin-top: 1.5rem;">
+          <button type="button" id="meet-community-btn" class="button-primary">
+            Meet the Empower Community!
+          </button>
+        </div>
+        <!-- <p>
           Explore our services, schedule a consultation, and try our interactive learning tools designed to deepen
           accessibility awareness.
-        </p>
+        </p> -->
       </div>
       <figure class="panel-media">
         <img src="images/services.png" alt="Designers collaborating on an inclusive interface">
@@ -96,7 +106,8 @@
             <input id="email" name="email" type="email" autocomplete="email" required class="form-input">
 
             <label for="phone" class="form-label">Phone</label>
-            <input id="phone" name="phone" type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="613-555-1234" class="form-input">
+            <input id="phone" name="phone" type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="613-555-1234"
+              class="form-input">
 
             <label for="organization" class="form-label">Organization</label>
             <input id="organization" name="organization" type="text" autocomplete="organization" class="form-input">
@@ -138,8 +149,9 @@
             <div>
               <label for="updates-switch" class="form-label">Receive email updates</label>
               <div>
-                <img id="switch-img" src="images/switch-off.png" alt="Updates switch is off">
-                <span id="updates-switch" class="toggle" role="switch" aria-checked="false" tabindex="0" aria-label="Email updates toggle">Off</span>
+                <img id="switch-img" src="images/switch-off.png" alt="switch is off">
+                <span id="updates-switch" class="toggle" role="switch" aria-checked="false" tabindex="0"
+                  aria-label="Email updates toggle">Off</span>
                 <input type="hidden" id="updates-value" name="updates" value="false">
               </div>
             </div>
@@ -199,12 +211,12 @@
   <footer class="site-footer">
     <section aria-labelledby="footer-heading" class="footer-content">
       <h2 id="footer-heading">Let's Build Accessibility Together</h2>
-      <p>Email <a href="mailto:hello@empowerabilitylabs.org">hello@empowerabilitylabs.org</a> or call <a href="tel:6135554567">613-555-4567</a>.</p>
+      <p>Email <a href="mailto:hello@empowerabilitylabs.org">hello@empowerabilitylabs.org</a> or call <a
+          href="tel:6135554567">613-555-4567</a>.</p>
       <p class="footer-note">© <span data-current-year>2025</span> Empower Ability Labs. Accessibility for everyone.</p>
     </section>
   </footer>
   <script src="EmpowerAbilityLab.js"></script>
 </body>
+
 </html>
-
-

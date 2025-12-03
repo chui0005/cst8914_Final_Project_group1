@@ -209,7 +209,7 @@
    */
   function initModal() {
     // The button that triggers the modal
-    const modalTrigger = qs('#interactive [class*="button-secondary"]');
+    const modalTrigger = qs('#meet-community-btn, #interactive [class*="button-secondary"]');
     if (!modalTrigger) {
       console.info('No modal trigger (.button-secondary) found in interactive area — skipping modal init.');
       return;
@@ -259,8 +259,9 @@
     let modalInstance = null; // Stores the single modal object
     let previouslyFocused = null;
 
-    // Creates the modal DOM structure and its methods
-    function buildModal() {
+
+// Preview modal for home 
+ function buildModal() {
       const overlay = document.createElement('div');
       overlay.className = 'empower-modal-overlay';
       overlay.setAttribute('role', 'presentation');
@@ -283,21 +284,32 @@
 
       const heading = document.createElement('h2');
       heading.id = 'empower-modal-heading';
-      heading.textContent = 'Interactive Modal Preview';
+      heading.textContent = 'Community Steering Committee';
 
       const para = document.createElement('p');
-      para.textContent = 'This is a demonstration modal with a focus trap. Press **Escape** to close, click the close button, or click outside the dialog.';
-
+      para.textContent = 'We get an aha! moments from product managers who try our services for the first time. We offered many lab days, workshops and offered usability testing services to many companies and organizations including:'; 
       // Add example focusable controls inside modal
-      const exampleInput = document.createElement('input');
-      exampleInput.type = 'text';
-      exampleInput.placeholder = 'Type here';
-      exampleInput.className = 'form-input';
+      const exampleInput = document.createElement('ul');
+      const companies = ['McGill University', 'Walmart.ca', 'Apple.ca', 'Google.ca', 'Government of Canada']; // [cite: 87-91]
+      
+      companies.forEach(company => {
+        const li = document.createElement('li');
+        li.textContent = company;
+        list.appendChild(li);
+      });
 
-      const actionBtn = document.createElement('button');
-      actionBtn.type = 'button';
-      actionBtn.textContent = 'Take Action';
-      actionBtn.className = 'button-primary';
+
+
+
+
+      // exampleInput.type = 'text';
+      // exampleInput.placeholder = 'Type here';
+      // exampleInput.className = 'form-input';
+
+      // const actionBtn = document.createElement('button');
+      // actionBtn.type = 'button';
+      // actionBtn.textContent = 'Take Action';
+      // actionBtn.className = 'button-primary';
 
       content.appendChild(closeBtn);
       content.appendChild(heading);
@@ -384,6 +396,145 @@
       return { open, close };
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Creates the modal DOM structure and its methods
+    // function buildModal() {
+    //   const overlay = document.createElement('div');
+    //   overlay.className = 'empower-modal-overlay';
+    //   overlay.setAttribute('role', 'presentation');
+
+    //   const dialog = document.createElement('div');
+    //   dialog.className = 'empower-modal';
+    //   dialog.setAttribute('role', 'dialog');
+    //   dialog.setAttribute('aria-modal', 'true');
+    //   dialog.setAttribute('aria-labelledby', 'empower-modal-heading');
+    //   dialog.setAttribute('tabindex', '-1'); // For initial focus if no focusable children
+
+    //   const content = document.createElement('div');
+    //   content.className = 'empower-modal__content';
+
+    //   const closeBtn = document.createElement('button');
+    //   closeBtn.className = 'empower-modal__close';
+    //   closeBtn.setAttribute('aria-label', 'Close interactive modal');
+    //   closeBtn.type = 'button';
+    //   closeBtn.textContent = 'Close';
+
+    //   const heading = document.createElement('h2');
+    //   heading.id = 'empower-modal-heading';
+    //   heading.textContent = 'Interactive Modal Preview';
+
+    //   const para = document.createElement('p');
+    //   para.textContent = 'This is a demonstration modal with a focus trap. Press **Escape** to close, click the close button, or click outside the dialog.';
+
+    //   // Add example focusable controls inside modal
+    //   const exampleInput = document.createElement('input');
+    //   exampleInput.type = 'text';
+    //   exampleInput.placeholder = 'Type here';
+    //   exampleInput.className = 'form-input';
+
+    //   const actionBtn = document.createElement('button');
+    //   actionBtn.type = 'button';
+    //   actionBtn.textContent = 'Take Action';
+    //   actionBtn.className = 'button-primary';
+
+    //   content.appendChild(closeBtn);
+    //   content.appendChild(heading);
+    //   content.appendChild(para);
+    //   content.appendChild(exampleInput);
+    //   content.appendChild(actionBtn);
+    //   dialog.appendChild(content);
+    //   overlay.appendChild(dialog);
+
+    //   // Utility to find all focusable elements within the modal
+    //   function getFocusable(container) {
+    //     return qsa(FOCUSABLE, container).filter(isVisible);
+    //   }
+
+    //   function open() {
+    //     previouslyFocused = document.activeElement; // Save reference to the element that triggered the modal
+        
+    //     document.body.appendChild(overlay);
+        
+    //     // Hide main application content for screen readers
+    //     const main = qs('#main-content');
+    //     if (main) main.setAttribute('aria-hidden', 'true');
+
+    //     // Initial focus management: focus first element or the dialog itself
+    //     const focusables = getFocusable(dialog);
+    //     (focusables.length ? focusables[0] : dialog).focus();
+
+    //     // Add event listeners
+    //     overlay.addEventListener('click', overlayClick);
+    //     document.addEventListener('keydown', onKeyDown);
+    //     closeBtn.addEventListener('click', close);
+    //   }
+
+    //   function close() {
+    //     // Remove listeners
+    //     overlay.removeEventListener('click', overlayClick);
+    //     document.removeEventListener('keydown', onKeyDown);
+        
+    //     // Remove modal from DOM
+    //     if (overlay.parentElement) overlay.parentElement.removeChild(overlay);
+        
+    //     // Restore main content accessibility
+    //     const main = qs('#main-content');
+    //     if (main) main.removeAttribute('aria-hidden');
+        
+    //     // Restore focus to the trigger button
+    //     if (previouslyFocused) previouslyFocused.focus();
+    //   }
+
+    //   function overlayClick(e) {
+    //     // Close if the click target is the overlay itself (i.e., not a child element)
+    //     if (e.target === overlay) close();
+    //   }
+
+    //   function onKeyDown(e) {
+    //     if (e.key === 'Escape') {
+    //       e.preventDefault();
+    //       close();
+    //       return;
+    //     }
+    //     if (e.key === 'Tab') {
+    //       // Focus trap inside dialog
+    //       const focusables = getFocusable(dialog);
+    //       if (focusables.length === 0) {
+    //         e.preventDefault();
+    //         return;
+    //       }
+    //       const first = focusables[0];
+    //       const last = focusables[focusables.length - 1];
+    //       const active = document.activeElement;
+          
+    //       if (!e.shiftKey && active === last) {
+    //         // Tab from last element loops to first
+    //         e.preventDefault();
+    //         first.focus();
+    //       } else if (e.shiftKey && active === first) {
+    //         // Shift+Tab from first element loops to last
+    //         e.preventDefault();
+    //         last.focus();
+    //       }
+    //     }
+    //   }
+
+    //   return { open, close };
+    // }
+
     // Modal Trigger handler
     modalTrigger.addEventListener('click', (e) => {
       e.preventDefault();
@@ -436,6 +587,7 @@
           const updatesValue = document.getElementById("updates-value");
           if (switchImg) {
             switchImg.src = newState ? "images/switch-on.png" : "images/switch-off.png";
+            switchImg.alt = newState ? "Updates switch is on" : "Updates switch is off";
           }
           if (updatesValue) {
             updatesValue.value = String(newState); // Update the hidden form value
