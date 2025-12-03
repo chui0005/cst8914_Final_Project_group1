@@ -209,7 +209,7 @@
    */
   function initModal() {
     // The button that triggers the modal
-    const modalTrigger = qs('#meet-community-btn, #interactive [class*="button-secondary"]');
+    const modalTrigger = qsa('#meet-community-btn, #interactive [class*="button-secondary"]');
     if (!modalTrigger) {
       console.info('No modal trigger (.button-secondary) found in interactive area — skipping modal init.');
       return;
@@ -289,7 +289,7 @@
       const para = document.createElement('p');
       para.textContent = 'We get an aha! moments from product managers who try our services for the first time. We offered many lab days, workshops and offered usability testing services to many companies and organizations including:'; 
       // Add example focusable controls inside modal
-      const exampleInput = document.createElement('ul');
+      const list = document.createElement('ul');
       const companies = ['McGill University', 'Walmart.ca', 'Apple.ca', 'Google.ca', 'Government of Canada']; // [cite: 87-91]
       
       companies.forEach(company => {
