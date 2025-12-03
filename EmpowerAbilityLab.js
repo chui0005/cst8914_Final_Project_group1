@@ -296,7 +296,7 @@ const companies = ['McGill University', 'Walmart.ca', 'Apple.ca', 'Google.ca', '
 companies.forEach(company => {
   const li = document.createElement('li');
   li.textContent = company;
-  list.appendChild(li); // Now 'list' exists!
+  list.appendChild(li); 
 });
 
 
@@ -315,8 +315,8 @@ companies.forEach(company => {
       content.appendChild(closeBtn);
       content.appendChild(heading);
       content.appendChild(para);
-      content.appendChild(exampleInput);
-      content.appendChild(actionBtn);
+      content.appendChild(list);
+      //content.appendChild(actionBtn);
       dialog.appendChild(content);
       overlay.appendChild(dialog);
 
