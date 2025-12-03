@@ -288,15 +288,16 @@
 
       const para = document.createElement('p');
       para.textContent = 'We get an aha! moments from product managers who try our services for the first time. We offered many lab days, workshops and offered usability testing services to many companies and organizations including:'; 
-      // Add example focusable controls inside modal
-      const list = document.createElement('ul');
-      const companies = ['McGill University', 'Walmart.ca', 'Apple.ca', 'Google.ca', 'Government of Canada']; // [cite: 87-91]
       
-      companies.forEach(company => {
-        const li = document.createElement('li');
-        li.textContent = company;
-        list.appendChild(li);
-      });
+      // Add example focusable controls inside modal
+const list = document.createElement('ul'); 
+const companies = ['McGill University', 'Walmart.ca', 'Apple.ca', 'Google.ca', 'Government of Canada'];
+
+companies.forEach(company => {
+  const li = document.createElement('li');
+  li.textContent = company;
+  list.appendChild(li); // Now 'list' exists!
+});
 
 
 
