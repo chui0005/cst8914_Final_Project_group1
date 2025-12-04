@@ -101,7 +101,7 @@
 
       </div>
       <figure class="panel-media">
-        <img src="images/services.png" alt="Designers collaborating on an inclusive interface">
+        <img src="images/services.png" alt="A yellow cartoon smiley face with a big grin giving a thumbs up gesture.">
         <figcaption>Consulting, training, and audits tailored to your team.</figcaption>
       </figure>
     </section>
@@ -110,26 +110,27 @@
       <div class="panel-content">
         <h2 id="services-heading">Services That Scale Accessibility</h2>
         <p>
-          From compliance audits to immersive workshops, our team offers guidance anchored in WCAG 2.1 AA and inclusive
-          design best practices.
+         Dedicated space or programs designed to cultivate empathy and understanding among individuals towards the challenges faced by people with disabilities in using technology and interacting with various environments.
         </p>
         <ul class="feature-list">
           <li>
-            <h3>Accessibility Audits</h3>
-            <p>Comprehensive assessments with actionable roadmaps and prioritized fixes.</p>
+            <h3>Empathy Lab days and workshops</h3>
+            <p>The lab days and workshops typically provide hands-on experiences, simulations, and interactions with assistive technologies, tools, and scenarios that replicate the obstacles individuals with disabilities encounter daily</p>
           </li>
           <li>
-            <h3>Team Training</h3>
-            <p>Interactive sessions that align designers, developers, and content strategists.</p>
+            <h3>Inspirational speakers</h3>
+            <p>Invite a speaker with disabilities to take share their unique journey. This captivating addition to your upcoming event will offer insights that resonate, inspire, educate, and enrich your team collective understanding of inclusion.
+
+</p>
           </li>
           <li>
-            <h3>Inclusive Strategy</h3>
-            <p>Holistic accessibility programs that integrate policy, process, and product delivery.</p>
+            <h3>Usability testing</h3>
+            <p>Go beyond WCAG! Involve individuals with disabilities in usability testing to gather valuable insights for refining product strategy and identifying accessibility concerns at an early stage when solutions are more feasible and cost-effective. You have access to a diverse community of people with disabilities, who use various assistive technologies. With technical expertise ranging from novice to expert, our community can support your product lifecycle from user research, to design, to QA.</p>
           </li>
         </ul>
       </div>
       <figure class="panel-media">
-        <img src="images/services.png" alt="Workshop facilitator guiding a collaborative accessibility session">
+        <img src="images/services.png" alt="A yellow cartoon smiley face with a big grin giving a thumbs up gesture.">
         <figcaption>Hands-on practice makes accessibility part of every sprint.</figcaption>
       </figure>
     </section>
@@ -143,15 +144,19 @@
             Required fields are marked. Responses help us prepare resources relevant to your needs.
           </p>
           <div class="form-grid">
-            <label for="name" class="form-label">Name</label>
+            <label for="name" class="form-label">Name <span aria-label="required">*</span> </label>
             <input id="name" name="name" type="text" autocomplete="name" required class="form-input">
+
 
             <label for="email" class="form-label">Email <span aria-label="required">*</span></label>
             <input id="email" name="email" type="email" autocomplete="email" required class="form-input">
+<div id="email-error" class="error-message" role="alert" aria-live="polite"></div>
+            <label for="phone" class="form-label">Phone Number <span aria-label="required">*</span> </label>
+            <span id="phone-hint"  class="form-hint">Format: 613-123-1234</span>
+            <input id="phone" name="phone" type="tel" pattern="([0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})" 
+              class="form-input" aria-describedby="phone-hint phone-error">
 
-            <label for="phone" class="form-label">Phone</label>
-            <input id="phone" name="phone" type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="613-555-1234"
-              class="form-input">
+            <div id="phone-error" class="error-message" role="alert" aria-live="polite"></div>
 
             <label for="organization" class="form-label">Organization</label>
             <input id="organization" name="organization" type="text" autocomplete="organization" class="form-input">
@@ -254,7 +259,7 @@
 
   <footer class="site-footer">
     <section aria-labelledby="footer-heading" class="footer-content">
-      <h2 id="footer-heading">Let's Build Accessibility Together</h2>
+      <h2 id="footer-heading" class="footer-email-phone" >Let's Build Accessibility Together </h2>
       <p>Email <a href="mailto:hello@empowerabilitylabs.org" class="footer-email-phone">hello@empowerabilitylabs.org</a> or call <a
           href="tel:6135554567" class="footer-email-phone" >613-555-4567 </a>.</p>
       <p class="footer-note">© <span data-current-year>2025</span> Empower Ability Labs. Accessibility for everyone.</p>

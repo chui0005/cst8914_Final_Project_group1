@@ -363,10 +363,56 @@ p {
   font-weight: 600;
   border: 2px solid var(--color-ink);
 }
+.form-hint {
+  display: block; 
+  font-size: 0.875rem;
+  color: var(--color-ink-muted); 
+  margin-bottom: 0.2rem; 
+}
 
 .toggle[aria-checked="true"] {
   background-color: var(--color-highlight);
   color: #1a212f;
+}
+
+
+
+
+.error-message {
+  color: #d32f2f;       
+  font-size: 0.875rem;    
+  margin-top: 0.25rem;
+  min-height: 1.25rem;     
+  font-weight: 600;
+  display: block;
+}
+
+
+.form-status.error-status {
+  color: #d32f2f;
+  background-color: #fdecea; 
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #d32f2f;
+  font-weight: bold;
+}
+
+
+.form-status.success-status {
+  color: #1e4620;            
+  background-color: #edf7ed; 
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #1e4620;
+  font-weight: bold;
+}
+
+
+.form-input[aria-invalid="true"] {
+  border-color: #d32f2f;
+  background-color: #fff8f8;
 }
 
 .site-footer p {
@@ -455,6 +501,7 @@ p {
     scroll-behavior: auto !important;
   }
 }
+
 
 
 
