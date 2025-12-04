@@ -19,6 +19,20 @@
   --max-content-width: 72rem;
 }
 
+/* Add to EmpowerAbilityLab.css */
+#home .form-grid ul {
+  padding-left: 1.2rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+#home .form-grid article {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
 *,
 *::before,
 *::after {
@@ -280,7 +294,7 @@ p {
 
 #switch-img {
   width: 72px;
-  height: 36px;
+  height: 68px;
   margin-right: var(--space-sm);
   vertical-align: middle;
 }
@@ -355,6 +369,10 @@ p {
   color: #1a212f;
 }
 
+.site-footer p {
+  color: #ffffff !important;
+}
+
 .site-footer {
   margin-top: var(--space-xl);
   padding: var(--space-lg) clamp(var(--space-sm), 5vw, var(--space-xl));
@@ -374,6 +392,13 @@ p {
   font-weight: 600;
 }
 
+.footer-email-phone {
+  color: #ffffff;
+}
+
+
+
+
 .footer-content a:focus-visible {
   outline: 3px solid #f1c27d;
   outline-offset: 3px;
@@ -382,6 +407,7 @@ p {
 .footer-note {
   font-size: 0.9rem;
   color: #d2d8e5;
+   
 }
 
 @media (min-width: 768px) {

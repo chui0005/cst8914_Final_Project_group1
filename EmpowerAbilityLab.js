@@ -101,7 +101,7 @@
       if (pushState) {
         window.history.pushState({ route }, ROUTE_TITLES[route] || 'Empower Ability Labs', path);
       }
-      
+
       // 4. Update Page Title
       document.title = ROUTE_TITLES[route] || 'Empower Ability Labs';
 
@@ -147,7 +147,7 @@
 
       e.preventDefault(); // Prevent default scrolling for arrow keys
       arrowKeyMode = true;
-      
+
       // Find currently focused item
       const activeIndex = items.findIndex(it => it === document.activeElement);
       const currentFocused = activeIndex >= 0 ? activeIndex : 0;
@@ -167,7 +167,7 @@
           nextIndex = items.length - 1;
           break;
       }
-      
+
       if (nextIndex >= 0 && nextIndex !== currentFocused) {
         // Apply roving tabindex for arrow navigation
         setRoving(items, nextIndex);
@@ -204,64 +204,74 @@
     navigateTo(initialRoute, false); // Don't push state on initial load
   }
 
-  /**
+  
+/**
    * 2) Modal (dynamic) with Focus Trap and ESC close
    */
   function initModal() {
-    // The button that triggers the modal
-    const modalTrigger = qsa('#meet-community-btn, #interactive [class*="button-secondary"]');
-    if (!modalTrigger) {
-      console.info('No modal trigger (.button-secondary) found in interactive area — skipping modal init.');
+    // 1. Select ALL triggers (Home button + Interactive button)
+    // Note: We use 'modalTriggers' (PLURAL) because there is more than one.
+    const modalTriggers = qsa('#meet-community-btn, #interactive [class*="button-secondary"]');
+    
+    // Check if any buttons exist
+    if (!modalTriggers.length) {
+      console.info('No modal triggers found — skipping modal init.');
       return;
     }
 
-    // Modal CSS/DOM additions for presentation:
-    // This is not in the provided CSS, but is needed for a functional modal.
-    const modalStyles = `
-      .empower-modal-overlay {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-color: rgba(16, 37, 66, 0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-      }
-      .empower-modal {
-        background-color: var(--color-surface-alt);
-        padding: 2rem;
-        border-radius: var(--radius-md);
-        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-        max-width: 90vw;
-        width: 450px;
-        position: relative;
-      }
-      .empower-modal__close {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        padding: 0.5rem 1rem;
-        border-radius: 999px;
-        background: transparent;
-        border: 2px solid var(--color-ink);
-        cursor: pointer;
-      }
-      .empower-modal__content {
-          display: grid;
-          gap: 1rem;
-      }
-    `;
-    const styleTag = document.createElement('style');
-    styleTag.textContent = modalStyles;
-    document.head.appendChild(styleTag);
+    // 2. Add Modal CSS
+    if (!document.getElementById('empower-modal-styles')) {
+        const modalStyles = `
+        .empower-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(16, 37, 66, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .empower-modal {
+            background-color: var(--color-surface-alt);
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+            max-width: 90vw;
+            width: 500px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .empower-modal__close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            background: transparent;
+            border: 2px solid var(--color-ink);
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .empower-modal__content {
+            display: grid;
+            gap: 1rem;
+        }
+        .empower-modal__content ul {
+            padding-left: 1.5rem; 
+        }
+        `;
+        const styleTag = document.createElement('style');
+        styleTag.id = 'empower-modal-styles';
+        styleTag.textContent = modalStyles;
+        document.head.appendChild(styleTag);
+    }
 
-
-    let modalInstance = null; // Stores the single modal object
+    let modalInstance = null; 
     let previouslyFocused = null;
 
-
-// Preview modal for home 
- function buildModal() {
+    // 3. Define Build Function
+    function buildModal() {
       const overlay = document.createElement('div');
       overlay.className = 'empower-modal-overlay';
       overlay.setAttribute('role', 'presentation');
@@ -271,97 +281,76 @@
       dialog.setAttribute('role', 'dialog');
       dialog.setAttribute('aria-modal', 'true');
       dialog.setAttribute('aria-labelledby', 'empower-modal-heading');
-      dialog.setAttribute('tabindex', '-1'); // For initial focus if no focusable children
+      dialog.setAttribute('aria-describedby', 'empower-modal-desc');
+      dialog.setAttribute('tabindex', '-1'); 
 
       const content = document.createElement('div');
       content.className = 'empower-modal__content';
 
       const closeBtn = document.createElement('button');
       closeBtn.className = 'empower-modal__close';
-      closeBtn.setAttribute('aria-label', 'Close interactive modal');
+      closeBtn.setAttribute('aria-label', 'Close community modal');
       closeBtn.type = 'button';
       closeBtn.textContent = 'Close';
 
+      // --- Content Required by Appendix B ---
       const heading = document.createElement('h2');
       heading.id = 'empower-modal-heading';
       heading.textContent = 'Community Steering Committee';
+      dialog.setAttribute('aria-describedby', 'empower-modal-desc');
+      heading.setAttribute('tabindex', '-1');
 
       const para = document.createElement('p');
+      para.id = 'empower-modal-desc';
       para.textContent = 'We get an aha! moments from product managers who try our services for the first time. We offered many lab days, workshops and offered usability testing services to many companies and organizations including:'; 
+
+      const list = document.createElement('ul'); 
+      const companies = ['McGill University', 'Walmart.ca', 'Apple.ca', 'Google.ca', 'Government of Canada'];
       
-      // Add example focusable controls inside modal
-const list = document.createElement('ul'); 
-const companies = ['McGill University', 'Walmart.ca', 'Apple.ca', 'Google.ca', 'Government of Canada'];
-
-companies.forEach(company => {
-  const li = document.createElement('li');
-  li.textContent = company;
-  list.appendChild(li); 
-});
-
-
-
-
-
-      // exampleInput.type = 'text';
-      // exampleInput.placeholder = 'Type here';
-      // exampleInput.className = 'form-input';
-
-      // const actionBtn = document.createElement('button');
-      // actionBtn.type = 'button';
-      // actionBtn.textContent = 'Take Action';
-      // actionBtn.className = 'button-primary';
+      companies.forEach(company => {
+        const li = document.createElement('li');
+        li.textContent = company;
+        li.setAttribute('role', 'listitem');
+        list.appendChild(li); 
+      });
+      list.setAttribute('role', 'list');
 
       content.appendChild(closeBtn);
       content.appendChild(heading);
       content.appendChild(para);
-      content.appendChild(list);
-      //content.appendChild(actionBtn);
+      content.appendChild(list); 
       dialog.appendChild(content);
       overlay.appendChild(dialog);
 
-      // Utility to find all focusable elements within the modal
+      // --- Focus Management ---
       function getFocusable(container) {
         return qsa(FOCUSABLE, container).filter(isVisible);
       }
 
       function open() {
-        previouslyFocused = document.activeElement; // Save reference to the element that triggered the modal
-        
+        previouslyFocused = document.activeElement; 
         document.body.appendChild(overlay);
-        
-        // Hide main application content for screen readers
         const main = qs('#main-content');
         if (main) main.setAttribute('aria-hidden', 'true');
+        // const focusables = getFocusable(dialog);
+        // (focusables.length ? focusables[0] : dialog).focus();
+    heading.focus();
 
-        // Initial focus management: focus first element or the dialog itself
-        const focusables = getFocusable(dialog);
-        (focusables.length ? focusables[0] : dialog).focus();
-
-        // Add event listeners
         overlay.addEventListener('click', overlayClick);
         document.addEventListener('keydown', onKeyDown);
         closeBtn.addEventListener('click', close);
       }
 
       function close() {
-        // Remove listeners
         overlay.removeEventListener('click', overlayClick);
         document.removeEventListener('keydown', onKeyDown);
-        
-        // Remove modal from DOM
         if (overlay.parentElement) overlay.parentElement.removeChild(overlay);
-        
-        // Restore main content accessibility
         const main = qs('#main-content');
         if (main) main.removeAttribute('aria-hidden');
-        
-        // Restore focus to the trigger button
         if (previouslyFocused) previouslyFocused.focus();
       }
 
       function overlayClick(e) {
-        // Close if the click target is the overlay itself (i.e., not a child element)
         if (e.target === overlay) close();
       }
 
@@ -372,22 +361,16 @@ companies.forEach(company => {
           return;
         }
         if (e.key === 'Tab') {
-          // Focus trap inside dialog
           const focusables = getFocusable(dialog);
-          if (focusables.length === 0) {
-            e.preventDefault();
-            return;
-          }
+          if (focusables.length === 0) { e.preventDefault(); return; }
           const first = focusables[0];
           const last = focusables[focusables.length - 1];
           const active = document.activeElement;
           
           if (!e.shiftKey && active === last) {
-            // Tab from last element loops to first
             e.preventDefault();
             first.focus();
           } else if (e.shiftKey && active === first) {
-            // Shift+Tab from first element loops to last
             e.preventDefault();
             last.focus();
           }
@@ -397,160 +380,26 @@ companies.forEach(company => {
       return { open, close };
     }
 
+    // 4. Attach Listeners (Loop through 'modalTriggers')
+    // THIS IS WHERE YOUR ERROR WAS. DO NOT CHANGE THIS LOOP.
+    modalTriggers.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!modalInstance) modalInstance = buildModal();
+            modalInstance.open();
+        });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Creates the modal DOM structure and its methods
-    // function buildModal() {
-    //   const overlay = document.createElement('div');
-    //   overlay.className = 'empower-modal-overlay';
-    //   overlay.setAttribute('role', 'presentation');
-
-    //   const dialog = document.createElement('div');
-    //   dialog.className = 'empower-modal';
-    //   dialog.setAttribute('role', 'dialog');
-    //   dialog.setAttribute('aria-modal', 'true');
-    //   dialog.setAttribute('aria-labelledby', 'empower-modal-heading');
-    //   dialog.setAttribute('tabindex', '-1'); // For initial focus if no focusable children
-
-    //   const content = document.createElement('div');
-    //   content.className = 'empower-modal__content';
-
-    //   const closeBtn = document.createElement('button');
-    //   closeBtn.className = 'empower-modal__close';
-    //   closeBtn.setAttribute('aria-label', 'Close interactive modal');
-    //   closeBtn.type = 'button';
-    //   closeBtn.textContent = 'Close';
-
-    //   const heading = document.createElement('h2');
-    //   heading.id = 'empower-modal-heading';
-    //   heading.textContent = 'Interactive Modal Preview';
-
-    //   const para = document.createElement('p');
-    //   para.textContent = 'This is a demonstration modal with a focus trap. Press **Escape** to close, click the close button, or click outside the dialog.';
-
-    //   // Add example focusable controls inside modal
-    //   const exampleInput = document.createElement('input');
-    //   exampleInput.type = 'text';
-    //   exampleInput.placeholder = 'Type here';
-    //   exampleInput.className = 'form-input';
-
-    //   const actionBtn = document.createElement('button');
-    //   actionBtn.type = 'button';
-    //   actionBtn.textContent = 'Take Action';
-    //   actionBtn.className = 'button-primary';
-
-    //   content.appendChild(closeBtn);
-    //   content.appendChild(heading);
-    //   content.appendChild(para);
-    //   content.appendChild(exampleInput);
-    //   content.appendChild(actionBtn);
-    //   dialog.appendChild(content);
-    //   overlay.appendChild(dialog);
-
-    //   // Utility to find all focusable elements within the modal
-    //   function getFocusable(container) {
-    //     return qsa(FOCUSABLE, container).filter(isVisible);
-    //   }
-
-    //   function open() {
-    //     previouslyFocused = document.activeElement; // Save reference to the element that triggered the modal
-        
-    //     document.body.appendChild(overlay);
-        
-    //     // Hide main application content for screen readers
-    //     const main = qs('#main-content');
-    //     if (main) main.setAttribute('aria-hidden', 'true');
-
-    //     // Initial focus management: focus first element or the dialog itself
-    //     const focusables = getFocusable(dialog);
-    //     (focusables.length ? focusables[0] : dialog).focus();
-
-    //     // Add event listeners
-    //     overlay.addEventListener('click', overlayClick);
-    //     document.addEventListener('keydown', onKeyDown);
-    //     closeBtn.addEventListener('click', close);
-    //   }
-
-    //   function close() {
-    //     // Remove listeners
-    //     overlay.removeEventListener('click', overlayClick);
-    //     document.removeEventListener('keydown', onKeyDown);
-        
-    //     // Remove modal from DOM
-    //     if (overlay.parentElement) overlay.parentElement.removeChild(overlay);
-        
-    //     // Restore main content accessibility
-    //     const main = qs('#main-content');
-    //     if (main) main.removeAttribute('aria-hidden');
-        
-    //     // Restore focus to the trigger button
-    //     if (previouslyFocused) previouslyFocused.focus();
-    //   }
-
-    //   function overlayClick(e) {
-    //     // Close if the click target is the overlay itself (i.e., not a child element)
-    //     if (e.target === overlay) close();
-    //   }
-
-    //   function onKeyDown(e) {
-    //     if (e.key === 'Escape') {
-    //       e.preventDefault();
-    //       close();
-    //       return;
-    //     }
-    //     if (e.key === 'Tab') {
-    //       // Focus trap inside dialog
-    //       const focusables = getFocusable(dialog);
-    //       if (focusables.length === 0) {
-    //         e.preventDefault();
-    //         return;
-    //       }
-    //       const first = focusables[0];
-    //       const last = focusables[focusables.length - 1];
-    //       const active = document.activeElement;
-          
-    //       if (!e.shiftKey && active === last) {
-    //         // Tab from last element loops to first
-    //         e.preventDefault();
-    //         first.focus();
-    //       } else if (e.shiftKey && active === first) {
-    //         // Shift+Tab from first element loops to last
-    //         e.preventDefault();
-    //         last.focus();
-    //       }
-    //     }
-    //   }
-
-    //   return { open, close };
-    // }
-
-    // Modal Trigger handler
-    modalTrigger.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (!modalInstance) modalInstance = buildModal();
-      modalInstance.open();
-    });
-
-    // Allow Enter/Space on the button to open the modal
-    modalTrigger.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        modalTrigger.click();
-      }
+        btn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                btn.click();
+            }
+        });
     });
   }
+
+
+
 
   /**
    * 3) ARIA-compliant Toggle/Switch component
@@ -576,7 +425,7 @@ companies.forEach(company => {
         const current = s.getAttribute('aria-checked') === 'true';
         const newState = !current;
         s.setAttribute('aria-checked', String(newState));
-        
+
         // Handle visual update specific to the simple 'Off'/'On' switch
         if (s.classList.contains('toggle')) {
           s.textContent = newState ? 'On' : 'Off';
@@ -594,7 +443,7 @@ companies.forEach(company => {
             updatesValue.value = String(newState); // Update the hidden form value
           }
         }
-        
+
         // Custom event for external logic (optional)
         s.dispatchEvent(new CustomEvent('empower:switch', { detail: { checked: newState } }));
       }
@@ -612,11 +461,11 @@ companies.forEach(company => {
           toggle();
         }
       });
-      
+
       // Initialize the visual state for the interactive toggle (form switch initialized in part 4)
       if (s.classList.contains('toggle')) {
-          toggle(); // Run once to set initial visual state based on aria-checked
-          toggle(); // Run again to restore initial state and set text content
+        toggle(); // Run once to set initial visual state based on aria-checked
+        toggle(); // Run again to restore initial state and set text content
       }
     });
   }
@@ -645,31 +494,31 @@ companies.forEach(company => {
       eventDetails.hidden = !expanded; // Use the hidden attribute for true hiding
       // Update ARIA-expanded state on the control
       speakerCheckbox.setAttribute("aria-expanded", String(expanded));
-      
+
       // Clear event text if un-checked
       if (!expanded) {
-          eventText.value = '';
-          document.getElementById("event-text-error").textContent = ""; // Clear error
+        eventText.value = '';
+        document.getElementById("event-text-error").textContent = ""; // Clear error
       }
     });
 
     // --- Conditional UI: 'Interactive Tools' Page ---
     if (formToggleCheckbox && formToggleTextarea) {
-        formToggleCheckbox.addEventListener("change", () => {
-            const expanded = formToggleCheckbox.checked;
-            formToggleTextarea.hidden = !expanded;
-            formToggleCheckbox.setAttribute("aria-expanded", String(expanded));
-        });
+      formToggleCheckbox.addEventListener("change", () => {
+        const expanded = formToggleCheckbox.checked;
+        formToggleTextarea.hidden = !expanded;
+        formToggleCheckbox.setAttribute("aria-expanded", String(expanded));
+      });
     }
 
     // --- Form Validation ---
-    
+
     // Validates the phone field against the pattern
     function validatePhone(input) {
-        const phonePattern = new RegExp(input.getAttribute('pattern'));
-        return !input.value || phonePattern.test(input.value); // Valid if empty or matches pattern
+      const phonePattern = new RegExp(input.getAttribute('pattern'));
+      return !input.value || phonePattern.test(input.value); // Valid if empty or matches pattern
     }
-    
+
     /**
      * Shows error messages next to the field and returns true if field is valid.
      * @param {HTMLElement} input - The form control element.
@@ -677,30 +526,30 @@ companies.forEach(company => {
      * @returns {boolean} - true if valid, false if invalid.
      */
     function showFieldValidation(input, msg) {
-        const errorEl = document.getElementById(input.id + "-error");
-        if (!errorEl) return true; // Can't show error, so assume valid
+      const errorEl = document.getElementById(input.id + "-error");
+      if (!errorEl) return true; // Can't show error, so assume valid
 
-        if (msg) {
-            errorEl.textContent = msg;
-            input.setAttribute('aria-invalid', 'true');
-            return false;
-        } else {
-            errorEl.textContent = '';
-            input.removeAttribute('aria-invalid');
-            return true;
-        }
+      if (msg) {
+        errorEl.textContent = msg;
+        input.setAttribute('aria-invalid', 'true');
+        return false;
+      } else {
+        errorEl.textContent = '';
+        input.removeAttribute('aria-invalid');
+        return true;
+      }
     }
-    
+
     // Attach blur listeners for immediate feedback on critical fields
     const email = document.getElementById("email");
     const phone = document.getElementById("phone");
 
     email.addEventListener('blur', () => {
-        showFieldValidation(email, email.value.trim() && email.checkValidity() ? '' : "A valid email is required.");
+      showFieldValidation(email, email.value.trim() && email.checkValidity() ? '' : "A valid email is required.");
     });
-    
+
     phone.addEventListener('blur', () => {
-        showFieldValidation(phone, validatePhone(phone) ? '' : "Phone number must be in the format 613-123-1234.");
+      showFieldValidation(phone, validatePhone(phone) ? '' : "Phone number must be in the format 613-123-1234.");
     });
 
 
@@ -721,12 +570,12 @@ companies.forEach(company => {
         valid = false;
         if (!firstErrorField) firstErrorField = email;
       }
-      
+
       // 3. Validate Phone (pattern)
       if (!validatePhone(phone)) {
-          showFieldValidation(phone, "Phone number must be in the format 613-123-1234.");
-          valid = false;
-          if (!firstErrorField) firstErrorField = phone;
+        showFieldValidation(phone, "Phone number must be in the format 613-123-1234.");
+        valid = false;
+        if (!firstErrorField) firstErrorField = phone;
       }
 
       // 4. Validate Topic (at least one checkbox checked)
@@ -739,7 +588,7 @@ companies.forEach(company => {
         valid = false;
         if (!firstErrorField) firstErrorField = topicFieldset;
       } else {
-          topicFieldset.removeAttribute('aria-invalid');
+        topicFieldset.removeAttribute('aria-invalid');
       }
 
       // 5. Validate Event Description if checkbox is selected
@@ -748,7 +597,7 @@ companies.forEach(company => {
         valid = false;
         if (!firstErrorField) firstErrorField = eventText;
       }
-      
+
       // 6. Focus on first error and announce failure
       if (!valid) {
         if (firstErrorField) firstErrorField.focus();
@@ -759,12 +608,12 @@ companies.forEach(company => {
         // 7. Successful Submission
         status.setAttribute('class', 'form-status success-status');
         status.textContent = "Thank you! Your call has been successfully scheduled. We will be in touch soon.";
-        
+
         // Reset form and UI elements
         form.reset();
         eventDetails.hidden = true;
         speakerCheckbox.setAttribute("aria-expanded", "false");
-        
+
         // Reset the updates switch
         const switchBtn = document.getElementById("updates-switch");
         const switchImg = document.getElementById("switch-img");
@@ -775,14 +624,14 @@ companies.forEach(company => {
       }
     });
   }
-  
+
   /**
    * 5) Update footer year on load
    */
   function initFooterYear() {
     const yearSpan = qs('[data-current-year]');
     if (yearSpan) {
-        yearSpan.textContent = new Date().getFullYear();
+      yearSpan.textContent = new Date().getFullYear();
     }
   }
 
@@ -797,3 +646,18 @@ companies.forEach(company => {
   });
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
