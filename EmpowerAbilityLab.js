@@ -26,35 +26,8 @@
     'interactive': 'Interactive Tools | Empower Ability Labs'
   };
 
-  /**
-   * Initialize skip link to work with both Space and Enter keys
-   */
-  function initSkipLink() {
-    const skipLink = document.querySelector('.skip-link');
-    const mainContent = document.getElementById('main-content');
-    
-    if (!skipLink || !mainContent) {
-      console.info('Skip link or main content not found — skipping skip link init.');
-      return;
-    }
 
-    skipLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      
-      // Set focus on main content
-      mainContent.setAttribute('tabindex', '-1');
-      mainContent.focus();
-      
-      // Optional: Remove tabindex after focus to prevent it from being 
-      // permanently in the tab order
-      mainContent.addEventListener('blur', function removeTempTabindex() {
-        mainContent.removeAttribute('tabindex');
-        mainContent.removeEventListener('blur', removeTempTabindex);
-      }, { once: true });
-    });
-  }
-
-  function initMenubarAndRouting() {
+function initMenubarAndRouting() {
     const items = qsa('.nav-link'); 
     const panels = qsa('[data-route-panel]');
     const main = qs('#main-content');
@@ -143,8 +116,13 @@
     const initialRoute = window.location.hash.substring(1) || items[0].getAttribute('data-route');
     // False: Do NOT move focus on refresh. Let the user start at the top.
     navigateTo(initialRoute, false, false); 
+
+
+
   }
 
+
+  
   /**
    * 2) Modal (dynamic) with Focus Trap and ESC close
    */
@@ -252,17 +230,32 @@
       // Removed tabindex from UL so it is not a "group" stop
       list.setAttribute('aria-label', 'List of participating companies');
       
-      const companies = ['McGill University', 'Walmart.ca', 'Apple.ca', 'Google.ca', 'Government of Canada'];
-      
-      companies.forEach(company => {
+      // Data with URLs to make them real links
+      const companies = [
+        { name: 'McGill University', url: 'https://www.mcgill.ca' },
+        { name: 'Walmart.ca', url: 'https://www.walmart.ca' },
+        { name: 'Apple.ca', url: 'https://www.apple.com/ca/' },
+        { name: 'Google.ca', url: 'https://www.google.ca' },
+        { name: 'Government of Canada', url: 'https://www.canada.ca' }
+      ]; 
+
+      companies.forEach(item => {
         const li = document.createElement('li');
-        li.textContent = company;
-        // ADDED: Tabindex 0 to EACH item so VoiceOver stops on them individually
-        li.setAttribute('tabindex', '0'); 
+        const a = document.createElement('a');
+        
+        a.textContent = item.name;
+        a.href = item.url;
+        a.target = "_blank"; // Open in new tab
+        // Security best practice for target="_blank"
+        a.setAttribute('rel', 'noopener noreferrer');
+        //  screen reader know it opens a new window
+        a.setAttribute('aria-label', `${item.name} (opens in a new tab)`);
+
+        li.appendChild(a);
         list.appendChild(li); 
       });
 
-      content.appendChild(closeBtn);
+   content.appendChild(closeBtn);
       content.appendChild(heading);
       content.appendChild(para);
       content.appendChild(list); 
@@ -368,6 +361,8 @@
         });
     });
   }
+  
+
 
   /**
    * 3) ARIA-compliant Toggle/Switch component
@@ -609,12 +604,26 @@
 
   // Initialize all components
   document.addEventListener('DOMContentLoaded', () => {
-    initSkipLink();        // NEW: Initialize skip link
     initFooterYear();
     initMenubarAndRouting();
     initModal();
-    initSwitches();
-    initForm();
+    initSwitches(); // Initializes interactive switches
+    initForm(); // Initializes form switch, conditional UI, and validation
   });
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
