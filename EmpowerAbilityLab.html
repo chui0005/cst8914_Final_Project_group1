@@ -182,18 +182,19 @@
                   <label for="topic-speaker">Invite a speaker with disabilities to your event</label>
                 </div>
 
+                <div>
+                  <input type="checkbox" id="topic-usability" name="topic" value="usability">
+                  <label for="topic-usability">Usability testing</label>
+                </div>
+
+
                 <!-- Conditional event details -->
                 <div id="event-details" hidden>
                   <label for="event-text" class="form-label">  Please tell us about your event</label>
                   <textarea id="event-text" name="event-text" rows="4" class="form-input"></textarea>
                   <span class="error" id="event-text-error" aria-live="polite"></span>
                 </div>
-
-                <div>
-                  <input type="checkbox" id="topic-usability" name="topic" value="usability">
-                  <label for="topic-usability">Usability testing</label>
-                </div>
-
+                
                 <span class="error" id="topic-error" aria-live="assertive"></span>
               </fieldset>
 
