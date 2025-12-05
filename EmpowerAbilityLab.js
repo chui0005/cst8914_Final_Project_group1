@@ -577,6 +577,9 @@
         status.setAttribute('class', 'form-status success-status');
         status.textContent = "Thank you! Your call has been successfully scheduled. We will be in touch soon.";
 
+        // Move focus to the success message so screen readers announce it
+        status.focus();
+
         // Reset form and UI elements
         form.reset();
         eventDetails.hidden = true;
