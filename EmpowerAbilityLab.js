@@ -508,7 +508,7 @@ function initMenubarAndRouting() {
     const phone = document.getElementById("phone");
 
     email.addEventListener('blur', () => {
-      showFieldValidation(email, email.value.trim() && email.checkValidity() ? '' : "A valid email is required.");
+      showFieldValidation(email, email.value.trim() && email.checkValidity() ? '' : "Enter a valid email address (for example, name@example.com)");
     });
 
     phone.addEventListener('blur', () => {
@@ -529,7 +529,7 @@ function initMenubarAndRouting() {
 
       // 2. Validate Email (required + format)
       if (!email.value.trim() || !email.checkValidity()) {
-        showFieldValidation(email, "A valid email is required.");
+        showFieldValidation(email, "Enter a valid email address (for example, name@example.com)");
         valid = false;
         if (!firstErrorField) firstErrorField = email;
       }
