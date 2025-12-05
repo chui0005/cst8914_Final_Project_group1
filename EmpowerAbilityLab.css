@@ -112,6 +112,17 @@ a:focus-visible {
   text-transform: uppercase;
 }
 
+.brand__link {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+
 .brand__mark {
   width: 64px;
   height: 64px;
