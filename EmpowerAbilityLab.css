@@ -298,7 +298,7 @@ p {
   margin: 0;
 }
 
-.form-fieldset > div {
+.form-fieldset > div:not([hidden]) {
   display: flex;
   align-items: center;
   gap: 0.75rem;
