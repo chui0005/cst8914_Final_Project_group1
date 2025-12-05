@@ -26,8 +26,35 @@
     'interactive': 'Interactive Tools | Empower Ability Labs'
   };
 
+  /**
+   * Initialize skip link to work with both Space and Enter keys
+   */
+  function initSkipLink() {
+    const skipLink = document.querySelector('.skip-link');
+    const mainContent = document.getElementById('main-content');
+    
+    if (!skipLink || !mainContent) {
+      console.info('Skip link or main content not found — skipping skip link init.');
+      return;
+    }
 
-function initMenubarAndRouting() {
+    skipLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      // Set focus on main content
+      mainContent.setAttribute('tabindex', '-1');
+      mainContent.focus();
+      
+      // Optional: Remove tabindex after focus to prevent it from being 
+      // permanently in the tab order
+      mainContent.addEventListener('blur', function removeTempTabindex() {
+        mainContent.removeAttribute('tabindex');
+        mainContent.removeEventListener('blur', removeTempTabindex);
+      }, { once: true });
+    });
+  }
+
+  function initMenubarAndRouting() {
     const items = qsa('.nav-link'); 
     const panels = qsa('[data-route-panel]');
     const main = qs('#main-content');
@@ -116,190 +143,7 @@ function initMenubarAndRouting() {
     const initialRoute = window.location.hash.substring(1) || items[0].getAttribute('data-route');
     // False: Do NOT move focus on refresh. Let the user start at the top.
     navigateTo(initialRoute, false, false); 
-
-
-
   }
-
-
-  // /**
-  //  * 1) Menubar + Routing (Roving Tabindex, History API, Focus Management, Page Title)
-  //  */
-  // function initMenubarAndRouting() {
-  //   const menubar = qs('.nav-list[role="menubar"]');
-  //   const main = qs('#main-content');
-  //   if (!menubar || !main) {
-  //     console.error('Missing menubar or main content — skipping routing init.');
-  //     return;
-  //   }
-
-  //   const items = qsa('.nav-link', menubar).filter(Boolean);
-  //   const panels = qsa('[data-route-panel]');
-
-  //   if (!items.length || !panels.length) {
-  //     console.warn('Missing navigation items or route panels.');
-  //     return;
-  //   }
-
-  //   /**
-  //    * Updates the tabindex for the Roving Tabindex pattern (only for arrow key navigation).
-  //    * @param {HTMLElement[]} list - Array of navigations links.
-  //    * @param {number} idx - Index of the item to set tabindex="0" and focus.
-  //    */
-  //   function setRoving(list, idx) {
-  //     list.forEach((el, i) => el.setAttribute('tabindex', i === idx ? '0' : '-1'));
-  //     const el = list[idx];
-  //     if (el && typeof el.focus === 'function') el.focus();
-  //   }
-
-  //   /**
-  //    * Resets all nav items to be in normal tab order (tabindex="0").
-  //    */
-  //   function resetTabOrder(list) {
-  //     list.forEach((el) => el.setAttribute('tabindex', '0'));
-  //   }
-
-  //   /**
-  //    * Executes the SPA navigation.
-  //    * @param {string} route - The route key (e.g., 'home', 'services').
-  //    * @param {boolean} [pushState=true] - Whether to add a new entry to the browser history.
-  //    */
-  //   function navigateTo(route, pushState = true) {
-  //     if (!route) return;
-
-  //     // 1. Show/Hide Panel
-  //     const targetPanel = panels.find(p => p.getAttribute('data-route-panel') === route);
-
-  //     panels.forEach(p => {
-  //       if (p === targetPanel) {
-  //         p.removeAttribute('hidden');
-  //         p.style.display = ''; // Restore CSS display
-  //       } else {
-  //         p.setAttribute('hidden', 'true');
-  //         p.style.display = 'none';
-  //       }
-  //     });
-
-  //     // 2. Update Nav ARIA state (keep all items in tab order)
-  //     items.forEach(it => {
-  //       if (it.getAttribute('data-route') === route) {
-  //         it.setAttribute('aria-current', 'page');
-  //       } else {
-  //         it.removeAttribute('aria-current');
-  //       }
-  //       // Keep all items in normal tab order
-  //       it.setAttribute('tabindex', '0');
-  //     });
-
-
-  //     // 3. History API (URL and Back/Forward Sync)
-  //     const path = `#${route}`;
-  //     if (pushState) {
-  //       window.history.pushState({ route }, ROUTE_TITLES[route] || 'Empower Ability Labs', path);
-  //     }
-
-  //     // 4. Update Page Title
-  //     document.title = ROUTE_TITLES[route] || 'Empower Ability Labs';
-
-  //     // 5. Focus Management (Shift focus to the page's main heading)
-  //     const targetHeading = targetPanel ? qs('h1, h2', targetPanel) : null;
-  //     if (targetHeading) {
-  //       // Use heading if available, otherwise use main content area
-  //       targetHeading.setAttribute('tabindex', '-1'); // Make heading focusable
-  //       targetHeading.focus();
-  //       targetHeading.removeAttribute('tabindex'); // Remove tabindex so it's not permanently in tab order
-  //     } else {
-  //       main.focus();
-  //     }
-  //   }
-
-  //   // Nav item click event
-  //   items.forEach(btn => {
-  //     btn.addEventListener('click', (e) => {
-  //       e.preventDefault();
-  //       const route = btn.getAttribute('data-route');
-  //       navigateTo(route);
-  //     });
-  //     // Keyboard activation (Enter/Space on menuitem) handled below, but click works too
-  //   });
-
-  //   // Track if we're in arrow key navigation mode
-  //   let arrowKeyMode = false;
-
-  //   // Arrow navigation on menubar (left/right/home/end) - Roving Tabindex implementation
-  //   // Only applies roving tabindex when arrow keys are used, Tab key works normally
-  //   menubar.addEventListener('keydown', (e) => {
-  //     // If Tab is pressed, reset to normal tab order immediately
-  //     if (e.key === 'Tab') {
-  //       resetTabOrder(items);
-  //       arrowKeyMode = false;
-  //       return; // Let Tab work normally
-  //     }
-
-  //     // Only handle arrow keys, Home, End
-  //     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') {
-  //       return; // Let other keys work normally
-  //     }
-
-  //     e.preventDefault(); // Prevent default scrolling for arrow keys
-  //     arrowKeyMode = true;
-
-  //     // Find currently focused item
-  //     const activeIndex = items.findIndex(it => it === document.activeElement);
-  //     const currentFocused = activeIndex >= 0 ? activeIndex : 0;
-  //     let nextIndex = -1;
-
-  //     switch (e.key) {
-  //       case 'ArrowRight':
-  //         nextIndex = (currentFocused + 1) % items.length;
-  //         break;
-  //       case 'ArrowLeft':
-  //         nextIndex = (currentFocused - 1 + items.length) % items.length;
-  //         break;
-  //       case 'Home':
-  //         nextIndex = 0;
-  //         break;
-  //       case 'End':
-  //         nextIndex = items.length - 1;
-  //         break;
-  //     }
-
-  //     if (nextIndex >= 0 && nextIndex !== currentFocused) {
-  //       // Apply roving tabindex for arrow navigation
-  //       setRoving(items, nextIndex);
-  //     }
-  //   });
-
-  //   // Reset tab order when focus leaves the menubar
-  //   menubar.addEventListener('focusout', (e) => {
-  //     // If focus moved outside the menubar, reset all items to normal tab order
-  //     if (!menubar.contains(e.relatedTarget)) {
-  //       resetTabOrder(items);
-  //       arrowKeyMode = false;
-  //     }
-  //   });
-
-  //   // Also reset when focus enters menubar via Tab (not arrow keys)
-  //   menubar.addEventListener('focusin', (e) => {
-  //     if (!arrowKeyMode && e.target.classList.contains('nav-link')) {
-  //       resetTabOrder(items);
-  //     }
-  //   });
-
-  //   // History API: Handle back/forward button
-  //   window.addEventListener('popstate', (e) => {
-  //     const route = e.state ? e.state.route : (window.location.hash.substring(1) || items[0].getAttribute('data-route'));
-  //     navigateTo(route, false); // Don't push a new state
-  //   });
-
-  //   // Initialize all nav items to be in normal tab order
-  //   resetTabOrder(items);
-
-  //   // Initial load: determine starting route
-  //   const initialRoute = window.location.hash.substring(1) || items[0].getAttribute('data-route');
-  //   navigateTo(initialRoute, false); // Don't push state on initial load
-  // }
-
 
   /**
    * 2) Modal (dynamic) with Focus Trap and ESC close
@@ -524,202 +368,6 @@ function initMenubarAndRouting() {
         });
     });
   }
-  
-// /**
-//    * 2) Modal (dynamic) with Focus Trap and ESC close
-//    */
-//   function initModal() {
-//     // 1. Select ALL triggers (Home button + Interactive button)
-//     // Note: We use 'modalTriggers' (PLURAL) because there is more than one.
-//     const modalTriggers = qsa('#meet-community-btn, #interactive [class*="button-secondary"]');
-    
-//     // Check if any buttons exist
-//     if (!modalTriggers.length) {
-//       console.info('No modal triggers found — skipping modal init.');
-//       return;
-//     }
-
-//     // 2. Add Modal CSS
-//     if (!document.getElementById('empower-modal-styles')) {
-//         const modalStyles = `
-//         .empower-modal-overlay {
-//             position: fixed;
-//             top: 0; left: 0; right: 0; bottom: 0;
-//             background-color: rgba(16, 37, 66, 0.8);
-//             display: flex;
-//             justify-content: center;
-//             align-items: center;
-//             z-index: 9999;
-//         }
-//         .empower-modal {
-//             background-color: var(--color-surface-alt);
-//             padding: 2rem;
-//             border-radius: var(--radius-md);
-//             box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-//             max-width: 90vw;
-//             width: 500px;
-//             position: relative;
-//             max-height: 90vh;
-//             overflow-y: auto;
-//         }
-//         .empower-modal__close {
-//             position: absolute;
-//             top: 1rem;
-//             right: 1rem;
-//             padding: 0.5rem 1rem;
-//             border-radius: 999px;
-//             background: transparent;
-//             border: 2px solid var(--color-ink);
-//             cursor: pointer;
-//             font-weight: 600;
-//         }
-//         .empower-modal__content {
-//             display: grid;
-//             gap: 1rem;
-//         }
-//         .empower-modal__content ul {
-//             padding-left: 1.5rem; 
-//         }
-//         `;
-//         const styleTag = document.createElement('style');
-//         styleTag.id = 'empower-modal-styles';
-//         styleTag.textContent = modalStyles;
-//         document.head.appendChild(styleTag);
-//     }
-
-//     let modalInstance = null; 
-//     let previouslyFocused = null;
-
-//     // 3. Define Build Function
-//     function buildModal() {
-//       const overlay = document.createElement('div');
-//       overlay.className = 'empower-modal-overlay';
-//       overlay.setAttribute('role', 'presentation');
-
-//       const dialog = document.createElement('div');
-//       dialog.className = 'empower-modal';
-//       dialog.setAttribute('role', 'dialog');
-//       dialog.setAttribute('aria-modal', 'true');
-//       dialog.setAttribute('aria-labelledby', 'empower-modal-heading');
-//       dialog.setAttribute('aria-describedby', 'empower-modal-desc');
-//       dialog.setAttribute('tabindex', '-1'); 
-
-//       const content = document.createElement('div');
-//       content.className = 'empower-modal__content';
-
-//       const closeBtn = document.createElement('button');
-//       closeBtn.className = 'empower-modal__close';
-//       closeBtn.setAttribute('aria-label', 'Close community modal');
-//       closeBtn.type = 'button';
-//       closeBtn.textContent = 'Close';
-
-//       // --- Content Required by Appendix B ---
-//       const heading = document.createElement('h2');
-//       heading.id = 'empower-modal-heading';
-//       heading.textContent = 'Community Steering Committee';
-//       dialog.setAttribute('aria-describedby', 'empower-modal-desc');
-//       heading.setAttribute('tabindex', '-1');
-
-//       const para = document.createElement('p');
-//       para.id = 'empower-modal-desc';
-//       para.textContent = 'We get an aha! moments from product managers who try our services for the first time. We offered many lab days, workshops and offered usability testing services to many companies and organizations including:'; 
-
-//       const list = document.createElement('ul'); 
-//       const companies = ['McGill University', 'Walmart.ca', 'Apple.ca', 'Google.ca', 'Government of Canada'];
-      
-//       companies.forEach(company => {
-//         const li = document.createElement('li');
-//         li.textContent = company;
-//         li.setAttribute('role', 'listitem');
-//         list.appendChild(li); 
-//       });
-//       list.setAttribute('role', 'list');
-
-//       content.appendChild(closeBtn);
-//       content.appendChild(heading);
-//       content.appendChild(para);
-//       content.appendChild(list); 
-//       dialog.appendChild(content);
-//       overlay.appendChild(dialog);
-
-//       // --- Focus Management ---
-//       function getFocusable(container) {
-//         return qsa(FOCUSABLE, container).filter(isVisible);
-//       }
-
-//       function open() {
-//         previouslyFocused = document.activeElement; 
-//         document.body.appendChild(overlay);
-//         const main = qs('#main-content');
-//         if (main) main.setAttribute('aria-hidden', 'true');
-//         // const focusables = getFocusable(dialog);
-//         // (focusables.length ? focusables[0] : dialog).focus();
-//     heading.focus();
-
-//         overlay.addEventListener('click', overlayClick);
-//         document.addEventListener('keydown', onKeyDown);
-//         closeBtn.addEventListener('click', close);
-//       }
-
-//       function close() {
-//         overlay.removeEventListener('click', overlayClick);
-//         document.removeEventListener('keydown', onKeyDown);
-//         if (overlay.parentElement) overlay.parentElement.removeChild(overlay);
-//         const main = qs('#main-content');
-//         if (main) main.removeAttribute('aria-hidden');
-//         if (previouslyFocused) previouslyFocused.focus();
-//       }
-
-//       function overlayClick(e) {
-//         if (e.target === overlay) close();
-//       }
-
-//       function onKeyDown(e) {
-//         if (e.key === 'Escape') {
-//           e.preventDefault();
-//           close();
-//           return;
-//         }
-//         if (e.key === 'Tab') {
-//           const focusables = getFocusable(dialog);
-//           if (focusables.length === 0) { e.preventDefault(); return; }
-//           const first = focusables[0];
-//           const last = focusables[focusables.length - 1];
-//           const active = document.activeElement;
-          
-//           if (!e.shiftKey && active === last) {
-//             e.preventDefault();
-//             first.focus();
-//           } else if (e.shiftKey && active === first) {
-//             e.preventDefault();
-//             last.focus();
-//           }
-//         }
-//       }
-
-//       return { open, close };
-//     }
-
-//     // 4. Attach Listeners (Loop through 'modalTriggers')
-//     // THIS IS WHERE YOUR ERROR WAS. DO NOT CHANGE THIS LOOP.
-//     modalTriggers.forEach(btn => {
-//         btn.addEventListener('click', (e) => {
-//             e.preventDefault();
-//             if (!modalInstance) modalInstance = buildModal();
-//             modalInstance.open();
-//         });
-
-//         btn.addEventListener('keydown', (e) => {
-//             if (e.key === 'Enter' || e.key === ' ') {
-//                 e.preventDefault();
-//                 btn.click();
-//             }
-//         });
-//     });
-//   }
-
-
-
 
   /**
    * 3) ARIA-compliant Toggle/Switch component
@@ -929,6 +577,9 @@ function initMenubarAndRouting() {
         status.setAttribute('class', 'form-status success-status');
         status.textContent = "Thank you! Your call has been successfully scheduled. We will be in touch soon.";
 
+        // Move focus to the success message so screen readers announce it
+        status.focus();
+
         // Reset form and UI elements
         form.reset();
         eventDetails.hidden = true;
@@ -958,26 +609,12 @@ function initMenubarAndRouting() {
 
   // Initialize all components
   document.addEventListener('DOMContentLoaded', () => {
+    initSkipLink();        // NEW: Initialize skip link
     initFooterYear();
     initMenubarAndRouting();
     initModal();
-    initSwitches(); // Initializes interactive switches
-    initForm(); // Initializes form switch, conditional UI, and validation
+    initSwitches();
+    initForm();
   });
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
