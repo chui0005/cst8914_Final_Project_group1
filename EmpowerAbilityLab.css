@@ -279,6 +279,12 @@ p {
   margin: 0;
 }
 
+.form-fieldset > div {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .form-fieldset legend {
   font-weight: 600;
   color: var(--color-ink);
