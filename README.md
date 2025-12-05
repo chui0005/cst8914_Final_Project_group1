@@ -10,10 +10,10 @@ The goal is to create an inclusive, keyboard-friendly, screen-reader-accessible 
 
 | Name | Student Number | Section Responsibility |
 |------|----------------|------------------------|
-| Ngabo Nsengiyumva | 041196196 | Javascript |
-| Aryan rudani | 041171391 | |
+| Ngabo Nsengiyumva | 041196196 | SPA |
+| Aryan rudani | 041171391 |Javascript |
 | Trevor Oliver Kutto | 041164341 | UI and Page Functionality  |
-| Bryan Chuinkam | 040811108 |  |
+| Bryan Chuinkam | 040811108 | form |
 
 
 ---
