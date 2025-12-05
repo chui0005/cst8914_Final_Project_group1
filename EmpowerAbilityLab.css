@@ -292,6 +292,12 @@ p {
   margin-bottom: var(--space-sm);
 }
 
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .switch-button {
   all: unset;                 /* removes ALL default button styles */
   display: inline-flex;
