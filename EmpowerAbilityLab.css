@@ -292,12 +292,20 @@ p {
   margin-bottom: var(--space-sm);
 }
 
+.switch-button {
+  all: unset;                 /* removes ALL default button styles */
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+
 #switch-img {
   width: 72px;
-  height: 68px;
-  margin-right: var(--space-sm);
-  vertical-align: middle;
+  height: auto;
+  display: block;
 }
+
 
 .button-primary,
 .button-secondary {
